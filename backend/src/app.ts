@@ -3,12 +3,14 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import {
+  csrfProtect,
   errorHandler,
   notFoundHandler,
   requestContext,
   requestLogger,
 } from './middleware/index.js';
 import { healthRouter } from './routes/health.routes.js';
+import { authRouter } from './routes/auth.routes.js';
 import { env } from './config/env.js';
 
 export function createApp(): Express {
@@ -64,8 +66,12 @@ export function createApp(): Express {
   app.use(requestContext);
   app.use(requestLogger);
 
+  // CSRF protection — corre antes de las rutas mutables.
+  app.use('/api', csrfProtect);
+
   // Routes
   app.use('/api', healthRouter);
+  app.use('/api', authRouter);
 
   // 404 + error handler
   app.use(notFoundHandler);

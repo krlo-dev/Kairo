@@ -59,15 +59,15 @@ npm run build              # build de producción
 
 ## Estado de integraciones externas
 
-| Servicio | Estado |
-|---|---|
-| Dominio kairo.com.co | ⏳ por comprar |
-| Mercado Libre OAuth | ⏳ aplicación enviada |
-| AliExpress Affiliate | ⏳ por aplicar |
-| Meta Business + WhatsApp | ⏳ por aplicar |
-| MercadoPago | ⏳ por crear cuenta |
-| Resend | ⏳ por crear cuenta |
-| Sentry, Uptime Robot, Cloudflare | ⏳ por crear cuentas |
+| Servicio                         | Estado                                                                               |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| Dominio kairo.com.co             | ⏳ por comprar                                                                       |
+| Mercado Libre OAuth              | ✅ cuenta developer creada (falta `ML_APP_ID` + `ML_CLIENT_SECRET` en `.env`)        |
+| AliExpress Affiliate             | ✅ cuenta creada (falta `AE_APP_KEY` + `AE_APP_SECRET` + `AE_TRACKING_ID` en `.env`) |
+| Meta Business + WhatsApp         | ⏳ por aplicar                                                                       |
+| MercadoPago                      | ⏳ por crear cuenta                                                                  |
+| Resend                           | ⏳ por crear cuenta                                                                  |
+| Sentry, Uptime Robot, Cloudflare | ⏳ por crear cuentas                                                                 |
 
 ## Licencia
 
