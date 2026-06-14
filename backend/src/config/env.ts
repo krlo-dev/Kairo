@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().positive().default(3000),
+  PORT: z.coerce.number().int().min(0).default(3000),
   APP_URL: z.string().url(),
   FRONTEND_URL: z.string().url(),
 
@@ -42,12 +42,20 @@ const envSchema = z.object({
   RESEND_FROM_ALERTS: z.string().email().default('alertas@kairo.com.co'),
 
   SENTRY_DSN: z.string().optional().default(''),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   LOGTAIL_TOKEN: z.string().optional().default(''),
 
-  RATE_LIMIT_AUTH_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000),
+  RATE_LIMIT_AUTH_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(15 * 60 * 1000),
   RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(10),
-  RATE_LIMIT_API_WINDOW_MS: z.coerce.number().int().positive().default(60 * 1000),
+  RATE_LIMIT_API_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(60 * 1000),
   RATE_LIMIT_API_MAX: z.coerce.number().int().positive().default(120),
 
   METRICS_TOKEN: z.string().optional().default(''),

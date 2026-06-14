@@ -10,6 +10,11 @@ build/
 .turbo/
 *.tsbuildinfo
 
+# TS composite project artifacts (generated from .ts configs)
+frontend/*.config.js
+frontend/*.config.d.ts
+frontend/postcss.config.d.ts
+
 # Environment
 .env
 .env.local

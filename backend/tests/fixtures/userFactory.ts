@@ -18,9 +18,8 @@ export function buildUser(overrides: UserInput = {}) {
     email: overrides.email ?? `user-${suffix}@kairo.test`,
     name: overrides.name ?? `Test User ${suffix}`,
     passwordHash:
-      overrides.passwordHash ??
-      '$2b$12$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.abc',
-    plan: overrides.plan ?? ('FREE' as Plan),
+      overrides.passwordHash ?? '$2b$12$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.abc',
+    plan: overrides.plan ?? ('FREE' satisfies Plan),
     emailVerified: overrides.emailVerified ?? true,
   };
 }

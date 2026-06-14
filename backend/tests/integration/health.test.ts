@@ -23,11 +23,17 @@ describe('GET /api/health', () => {
   it('responde con json y estructura esperada', async () => {
     const res = await request(app).get('/api/health');
     expect([200, 503]).toContain(res.status);
-    expect(res.body).toHaveProperty('status');
-    expect(res.body).toHaveProperty('env');
-    expect(res.body).toHaveProperty('version');
-    expect(res.body).toHaveProperty('checks');
-    expect(res.body.checks).toHaveProperty('api', 'ok');
+    const body = res.body as {
+      status: string;
+      env: string;
+      version: string;
+      checks: Record<string, string>;
+    };
+    expect(body.status).toBeDefined();
+    expect(body.env).toBeDefined();
+    expect(body.version).toBeDefined();
+    expect(body.checks).toBeDefined();
+    expect(body.checks.api).toBe('ok');
   });
 
   it('incluye un X-Request-ID en la respuesta', async () => {

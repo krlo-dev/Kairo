@@ -34,12 +34,10 @@
       "@/*": ["src/*"]
     },
 
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": false,
+    "noEmit": true,
     "sourceMap": true,
     "removeComments": false
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "prisma/**/*.ts"],
   "exclude": ["node_modules", "dist", "coverage"]
 }

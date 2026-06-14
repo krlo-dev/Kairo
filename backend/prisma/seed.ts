@@ -5,7 +5,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Placeholder: cuando exista auth se sembrará un user dev.
+  await prisma.$connect();
+  // Placeholder: cuando exista auth se sembrará un user dev en Fase 1.
   console.warn('[seed] No hay datos seed configurados aún.');
 }
 
@@ -14,4 +15,6 @@ main()
     console.error('[seed] Error:', err);
     process.exitCode = 1;
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => {
+    void prisma.$disconnect();
+  });

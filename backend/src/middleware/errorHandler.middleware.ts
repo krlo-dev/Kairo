@@ -1,4 +1,4 @@
-import type { ErrorRequestHandler } from 'express';
+import type { ErrorRequestHandler, RequestHandler } from 'express';
 import { ZodError } from 'zod';
 import { AppError } from '../utils/errors.js';
 import { logger } from '../logger/pino.js';
@@ -39,7 +39,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   });
 };
 
-export const notFoundHandler: import('express').RequestHandler = (req, res) => {
+export const notFoundHandler: RequestHandler = (req, res) => {
   res.status(404).json({
     error: {
       code: 'not_found',

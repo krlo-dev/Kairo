@@ -36,5 +36,14 @@ module.exports = {
     ],
     'react/prop-types': 'off',
   },
-  ignorePatterns: ['dist', 'node_modules', '*.cjs', '*.config.ts'],
+  ignorePatterns: [
+    'dist',
+    'node_modules',
+    '*.cjs',
+    '*.config.ts',
+    // Artefactos que tsc -b emite junto a los .config.ts en builds compuestos
+    '*.config.js',
+    '*.config.d.ts',
+    'postcss.config.d.ts',
+  ],
 };
