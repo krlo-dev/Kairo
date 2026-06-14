@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Kairo">
+  <title>Kairo — icon dark</title>
+  <!-- Fondo navy profundo con bordes redondeados -->
+  <rect x="0" y="0" width="512" height="512" rx="64" ry="64" fill="#1a1a2e"/>
+  <!-- Reloj sin números, color ámbar Kairo sobre navy -->
+  <g stroke="#BA7517" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="256" r="160" stroke-width="24"/>
+    <line x1="256" y1="256" x2="256" y2="126" stroke-width="22"/>
+    <line x1="256" y1="256" x2="351" y2="256" stroke-width="22"/>
+  </g>
+  <circle cx="256" cy="256" r="18" fill="#BA7517"/>
+</svg>

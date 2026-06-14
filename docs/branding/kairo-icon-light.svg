@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Kairo">
+  <title>Kairo — icon light</title>
+  <!-- Fondo ámbar Kairo con bordes redondeados -->
+  <rect x="0" y="0" width="512" height="512" rx="64" ry="64" fill="#BA7517"/>
+  <!-- Reloj sin números, color crema sobre ámbar -->
+  <g stroke="#FAEEDA" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Círculo del reloj -->
+    <circle cx="256" cy="256" r="160" stroke-width="24"/>
+    <!-- Manecilla de minutos: apunta a las 12 (hacia arriba) — el momento exacto -->
+    <line x1="256" y1="256" x2="256" y2="126" stroke-width="22"/>
+    <!-- Manecilla de horas: apunta a las 3 (hacia la derecha), más corta -->
+    <line x1="256" y1="256" x2="351" y2="256" stroke-width="22"/>
+  </g>
+  <!-- Punto central -->
+  <circle cx="256" cy="256" r="18" fill="#FAEEDA"/>
+</svg>

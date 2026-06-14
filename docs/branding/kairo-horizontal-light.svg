@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 512" width="1600" height="512" role="img" aria-label="Kairo">
+  <title>Kairo — logo horizontal light</title>
+  <!-- Ícono a la izquierda (512x512) -->
+  <rect x="0" y="0" width="512" height="512" rx="64" ry="64" fill="#BA7517"/>
+  <g stroke="#FAEEDA" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="256" r="160" stroke-width="24"/>
+    <line x1="256" y1="256" x2="256" y2="126" stroke-width="22"/>
+    <line x1="256" y1="256" x2="351" y2="256" stroke-width="22"/>
+  </g>
+  <circle cx="256" cy="256" r="18" fill="#FAEEDA"/>
+  <!-- Wordmark a la derecha -->
+  <text x="640" y="256" dominant-baseline="middle"
+        font-family="Inter, 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif"
+        font-weight="500"
+        font-size="280"
+        fill="#1a1a2e"
+        letter-spacing="-6">Kairo</text>
+</svg>
