@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+# Conventional Commits enforcement (light).
+# Mensajes válidos: feat:, fix:, chore:, docs:, refactor:, test:, perf:, ci:, build:, revert:, style:
+# Permite scope: feat(auth): ...
+
+commit_msg=$(cat "$1")
+pattern='^(feat|fix|chore|docs|refactor|test|perf|ci|build|revert|style)(\([a-z0-9-]+\))?!?: .+'
+
+if ! echo "$commit_msg" | grep -Eq "$pattern"; then
+  echo "❌ Commit no sigue Conventional Commits."
+  echo "   Ej: 'feat(auth): agregar login con cookies'"
+  echo "   Tipos permitidos: feat, fix, chore, docs, refactor, test, perf, ci, build, revert, style"
+  exit 1
+fi

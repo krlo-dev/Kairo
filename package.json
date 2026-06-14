@@ -1,0 +1,37 @@
+{
+  "name": "kairo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kairo — SaaS LATAM de inteligencia de precios (workspace root)",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "lint": "npm run lint --workspace=backend && npm run lint --workspace=frontend",
+    "typecheck": "npm run typecheck --workspace=backend && npm run typecheck --workspace=frontend",
+    "test": "npm test --workspace=backend && npm test --workspace=frontend",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend"
+  },
+  "devDependencies": {
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10"
+  },
+  "lint-staged": {
+    "backend/**/*.{ts,json}": [
+      "prettier --write",
+      "eslint --fix --max-warnings 0"
+    ],
+    "frontend/**/*.{ts,tsx,css,json}": [
+      "prettier --write",
+      "eslint --fix --max-warnings 0"
+    ],
+    "*.{md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

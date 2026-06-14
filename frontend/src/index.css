@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-kairo-paper text-neutral-900 font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-kairo-navyDeep text-neutral-50;
+    }
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-kairo-amber px-6 py-2.5 text-sm font-medium text-kairo-cream transition-colors duration-kairo hover:bg-kairo-amberDark focus:outline-none focus:ring-2 focus:ring-kairo-amber focus:ring-offset-2 disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg border border-kairo-amber px-6 py-2.5 text-sm font-medium text-kairo-amber transition-colors duration-kairo hover:bg-kairo-cream/40;
+  }
+}

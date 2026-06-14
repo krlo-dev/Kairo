@@ -1,0 +1,423 @@
+// Kairo — Prisma Schema v.1
+// Especificación detallada: ../../SPEC.md (sección 5)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================
+// USERS & AUTH
+// =========================
+
+model User {
+  id                    String    @id @default(uuid())
+  email                 String    @unique
+  passwordHash          String
+  name                  String
+  phone                 String?   // E.164: +57...
+  whatsappVerified      Boolean   @default(false)
+
+  emailVerified         Boolean   @default(false)
+  emailVerifiedAt       DateTime?
+  lastLoginAt           DateTime?
+  failedLoginAttempts   Int       @default(0)
+  accountLockedUntil    DateTime?
+
+  plan                  Plan      @default(FREE)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
+
+  trackedProducts       TrackedProduct[]
+  alerts                Alert[]
+  priceHistory          PriceHistory[]
+  alertNotifications    AlertNotification[]
+  refreshTokens         RefreshToken[]
+  passwordResetTokens   PasswordResetToken[]
+  emailVerifications    EmailVerification[]
+  mlOAuthToken          MLOAuthToken?
+  whatsappOptIns        WhatsAppOptIn[]
+  subscription          Subscription?
+  payments              Payment[]
+  auditLogs             AuditLog[]
+
+  @@index([email])
+  @@index([plan])
+  @@index([deletedAt])
+}
+
+enum Plan {
+  FREE
+  PRO
+  COMERCIANTE
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  replacedBy  String?
+  userAgent   String?
+  ip          String?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerification {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// =========================
+// TRACKING & PRICES
+// =========================
+
+model TrackedProduct {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  externalId   String
+  source       Source
+  title        String
+  imageUrl     String?  @db.Text
+  productUrl   String   @db.Text
+  currentPrice Decimal  @db.Decimal(12, 2)
+  currency     Currency @default(COP)
+  country      String   @default("CO")
+
+  addedAt      DateTime @default(now())
+  lockedUntil  DateTime?
+
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  priceHistory PriceHistory[]
+  alerts       Alert[]
+
+  @@unique([userId, externalId, source])
+  @@index([userId, isActive])
+  @@index([isActive])
+  @@index([externalId, source])
+  @@index([lockedUntil])
+}
+
+enum Source {
+  ML
+  ALIEXPRESS
+}
+
+enum Currency {
+  COP
+  USD
+  MXN
+  ARS
+  CLP
+  BRL
+  PEN
+}
+
+model PriceHistory {
+  id               String         @id @default(uuid())
+  trackedProductId String
+  trackedProduct   TrackedProduct @relation(fields: [trackedProductId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  price      Decimal  @db.Decimal(12, 2)
+  currency   Currency
+  recordedAt DateTime @default(now())
+
+  @@index([trackedProductId, recordedAt(sort: Desc)])
+  @@index([userId])
+  @@index([recordedAt])
+}
+
+model PriceAggregate {
+  // Rollup diario para retención larga (>90 días)
+  id         String   @id @default(uuid())
+  externalId String
+  source     Source
+  day        DateTime @db.Date
+  minPrice   Decimal  @db.Decimal(12, 2)
+  maxPrice   Decimal  @db.Decimal(12, 2)
+  avgPrice   Decimal  @db.Decimal(12, 2)
+  closePrice Decimal  @db.Decimal(12, 2)
+  samples    Int
+  currency   Currency
+
+  @@unique([externalId, source, day])
+  @@index([externalId, source, day(sort: Desc)])
+}
+
+// =========================
+// ALERTS
+// =========================
+
+model Alert {
+  id               String         @id @default(uuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackedProductId String
+  trackedProduct   TrackedProduct @relation(fields: [trackedProductId], references: [id], onDelete: Cascade)
+
+  mode             AlertMode      @default(ONE_SHOT)
+  direction        AlertDirection @default(DOWN)
+  targetPrice      Decimal?       @db.Decimal(12, 2)
+  pctThreshold     Float?
+  basePrice        Decimal?       @db.Decimal(12, 2)
+  cooldownDays     Int            @default(7)
+
+  notifyEmail      Boolean        @default(true)
+  notifyWhatsapp   Boolean        @default(false)
+
+  isActive         Boolean        @default(true)
+  triggered        Boolean        @default(false)
+  lastTriggeredAt  DateTime?
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  notifications    AlertNotification[]
+
+  @@index([userId, isActive])
+  @@index([trackedProductId, isActive, triggered])
+}
+
+enum AlertMode {
+  ONE_SHOT
+  RECURRING
+}
+
+enum AlertDirection {
+  DOWN
+  UP
+  PCT
+}
+
+model AlertNotification {
+  id              String              @id @default(uuid())
+  alertId         String
+  alert           Alert               @relation(fields: [alertId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  channel         NotificationChannel
+  idempotencyKey  String              @unique
+  status          NotificationStatus  @default(PENDING)
+  attempts        Int                 @default(0)
+  lastAttemptAt   DateTime?
+  externalId      String?
+  errorMessage    String?             @db.Text
+
+  pricePaid       Decimal             @db.Decimal(12, 2)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([alertId])
+  @@index([status])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+enum NotificationChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+// =========================
+// INTEGRATIONS — OAuth & WhatsApp
+// =========================
+
+model MLOAuthToken {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessTokenEncrypted  String   @db.Text
+  refreshTokenEncrypted String   @db.Text
+  expiresAt             DateTime
+  mlUserId              String
+  scope                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
+model WhatsAppOptIn {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone     String
+  optedInAt DateTime  @default(now())
+  method    String
+  ip        String?
+  userAgent String?
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([phone])
+}
+
+// =========================
+// BILLING
+// =========================
+
+model Subscription {
+  id                  String              @id @default(uuid())
+  userId              String              @unique
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan                Plan
+  status              SubscriptionStatus  @default(INCOMPLETE)
+  mpPreapprovalId     String?             @unique
+  mpPayerId           String?
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean             @default(false)
+  canceledAt          DateTime?
+
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@index([status])
+  @@index([currentPeriodEnd])
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mpPaymentId   String        @unique
+  amount        Decimal       @db.Decimal(12, 2)
+  currency      Currency      @default(COP)
+  status        PaymentStatus
+  method        String?
+  paidAt        DateTime?
+  failureReason String?       @db.Text
+  createdAt     DateTime      @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+  CHARGED_BACK
+}
+
+model WebhookEvent {
+  id           String    @id @default(uuid())
+  provider     String
+  externalId   String
+  payload      Json
+  processedAt  DateTime?
+  errorMessage String?   @db.Text
+  createdAt    DateTime  @default(now())
+
+  @@unique([provider, externalId])
+  @@index([processedAt])
+}
+
+// =========================
+// JOBS (cola en MySQL — v.1, reemplaza por BullMQ en v.2)
+// =========================
+
+model Job {
+  id          String    @id @default(uuid())
+  type        String
+  payload     Json
+  status      JobStatus @default(PENDING)
+  priority    Int       @default(0)
+  scheduledAt DateTime  @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  lastError   String?   @db.Text
+
+  createdAt   DateTime  @default(now())
+
+  @@index([status, scheduledAt, priority(sort: Desc)])
+  @@index([type, status])
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  DEAD
+}
+
+// =========================
+// AUDIT
+// =========================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  resource   String?
+  resourceId String?
+  ip         String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([action, createdAt(sort: Desc)])
+}
