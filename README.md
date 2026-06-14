@@ -5,7 +5,7 @@
 SaaS LATAM de inteligencia de precios. Rastrea productos en **Mercado Libre** y **AliExpress**, recibe alertas configurables cuando el precio baja, descubre trending y compara márgenes.
 
 - **Dominio:** kairo.com.co
-- **Estado:** v.1 en desarrollo (Fase 0 — Setup)
+- **Estado:** v.1 en desarrollo (Fase 1 — Auth)
 - **Stack:** TypeScript · Node.js 20 · Express · Prisma · MySQL · React · Vite · Tailwind · shadcn/ui
 
 ## Estructura del repo
@@ -23,20 +23,19 @@ kairo/
 
 ## Quick start
 
-```bash
-# Backend
-cd backend
-cp .env.example .env       # completar valores
-npm install
-npx prisma generate
-npx prisma migrate dev --name init
-npm run dev                # puerto 3000
+Guía completa paso a paso: **[docs/setup-local.md](./docs/setup-local.md)** (qué instalar, cómo configurar `.env`, troubleshooting, y la lista de cuentas externas que tienes que crear tú).
 
-# Frontend
-cd frontend
-cp .env.example .env
+Resumen para quien ya tiene Node 20 + Docker:
+
+```powershell
 npm install
-npm run dev                # puerto 5173
+Copy-Item backend/.env.example backend/.env       # rellenar secrets (ver guía)
+Copy-Item frontend/.env.example frontend/.env
+docker compose up -d                              # MySQL + Adminer
+docker exec kairo-mysql mysql -uroot -pdev-root-password -e "GRANT ALL PRIVILEGES ON *.* TO 'kairo'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+npx --workspace=backend prisma migrate deploy
+npm run dev --workspace=backend                   # terminal 1, puerto 3000
+npm run dev --workspace=frontend                  # terminal 2, puerto 5173
 ```
 
 ## Comandos útiles
@@ -52,6 +51,7 @@ npm run build              # build de producción
 ## Documentación
 
 - **[SPEC.md](./SPEC.md)** — especificación técnica completa (schema, integraciones, seguridad, fases)
+- **[docs/setup-local.md](./docs/setup-local.md)** — guía paso a paso para levantar el proyecto en local + checklist de cuentas externas
 - **[kairo-design-brief.md](./kairo-design-brief.md)** — identidad visual (paleta, tipografía, componentes)
 - **[docs/architecture.md](./docs/architecture.md)** — decisiones arquitectónicas
 - **[docs/deployment.md](./docs/deployment.md)** — guía de deploy a Hostinger
