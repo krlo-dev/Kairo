@@ -21,12 +21,13 @@ export const authIpLimiter = rateLimit({
   handler: errorResponse,
 });
 
-// Rate limit por email — 5 req / 15 min por email (login, forgot, reset).
+// Rate limit por email — N req / 15 min por email (login, forgot, reset).
+// Default 5; configurable via RATE_LIMIT_AUTH_EMAIL_MAX para testing y dev.
 // Necesario para evitar brute force sobre un email específico desde IPs
 // distintas. La key es lowercased.
 export const authEmailLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_AUTH_WINDOW_MS,
-  max: 5,
+  max: env.RATE_LIMIT_AUTH_EMAIL_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req: Request) => {

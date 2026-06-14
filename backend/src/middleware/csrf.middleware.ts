@@ -5,6 +5,10 @@ import { Errors } from '../utils/errors.js';
 // Estos endpoints NO requieren CSRF porque crean/restauran la sesión —
 // el cliente todavía no tiene cookie csrfToken. La protección efectiva
 // proviene del rate-limit en estos endpoints.
+//
+// Paths sin prefijo `/api` porque el middleware se monta con
+// app.use('/api', csrfProtect) y req.path queda relativo al mount point.
+// La comparación usa req.originalUrl para robustez ante futuros remontajes.
 const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/login',
   '/api/auth/register',
@@ -18,7 +22,9 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 export const csrfProtect: RequestHandler = (req, _res, next) => {
   if (SAFE_METHODS.has(req.method)) return next();
-  if (CSRF_EXEMPT_PATHS.has(req.path)) return next();
+  // req.originalUrl puede traer query string; comparar contra la ruta limpia.
+  const fullPath = req.originalUrl.split('?')[0] ?? req.originalUrl;
+  if (CSRF_EXEMPT_PATHS.has(fullPath)) return next();
 
   const cookies = (req.cookies ?? {}) as Record<string, string | undefined>;
   const cookieToken = cookies[CSRF_COOKIE_NAME];

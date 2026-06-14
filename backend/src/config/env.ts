@@ -51,6 +51,7 @@ const envSchema = z.object({
     .positive()
     .default(15 * 60 * 1000),
   RATE_LIMIT_AUTH_MAX: z.coerce.number().int().positive().default(10),
+  RATE_LIMIT_AUTH_EMAIL_MAX: z.coerce.number().int().positive().default(5),
   RATE_LIMIT_API_WINDOW_MS: z.coerce
     .number()
     .int()
