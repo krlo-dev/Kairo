@@ -9,6 +9,7 @@ export interface AuthUser {
   plan: Plan;
   emailVerified: boolean;
   whatsappVerified: boolean;
+  createdAt: string;
 }
 
 interface AuthState {

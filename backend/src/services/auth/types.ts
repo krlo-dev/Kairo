@@ -7,6 +7,7 @@ export interface PublicUser {
   name: string;
   plan: Plan;
   emailVerified: boolean;
+  whatsappVerified: boolean;
   createdAt: string;
 }
 
@@ -17,6 +18,7 @@ export function toPublicUser(u: User): PublicUser {
     name: u.name,
     plan: u.plan,
     emailVerified: u.emailVerified,
+    whatsappVerified: u.whatsappVerified,
     createdAt: u.createdAt.toISOString(),
   };
 }

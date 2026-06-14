@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export function Landing() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-24">
@@ -9,20 +11,18 @@ export function Landing() {
           El momento exacto para comprar.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-kairo-body text-neutral-600 dark:text-neutral-300">
-          Kairo rastrea precios en Mercado Libre y AliExpress, te avisa cuando bajan y te ayuda
-          a decidir cuándo importar. Datos primero, sin ruido.
+          Kairo rastrea precios en Mercado Libre y AliExpress, te avisa cuando bajan y te ayuda a
+          decidir cuándo importar. Datos primero, sin ruido.
         </p>
         <div className="mt-10 flex items-center justify-center gap-4">
-          <button type="button" className="btn-primary" disabled>
-            Empezar gratis (próximamente)
-          </button>
+          <Link to="/register" className="btn-primary">
+            Empezar gratis
+          </Link>
           <a href="#features" className="btn-ghost">
             Ver cómo funciona
           </a>
         </div>
-        <p className="mt-6 text-kairo-small text-neutral-500">
-          v.1 en desarrollo · Fase 0 completada
-        </p>
+        <p className="mt-6 text-kairo-small text-neutral-500">v.1 en desarrollo · Fase 1</p>
       </section>
 
       <section id="features" className="mt-32 grid gap-12 md:grid-cols-3">
