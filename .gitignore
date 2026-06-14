@@ -29,6 +29,10 @@ frontend/postcss.config.d.ts
 *.cert
 secrets/
 
+# Capturas locales con credenciales / paneles de proveedores
+imagenes/
+docs/integrations/screenshots/
+
 # Logs
 logs/
 *.log
