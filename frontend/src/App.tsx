@@ -9,6 +9,8 @@ import { VerifyEmail } from './pages/auth/VerifyEmail';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
 import { ResetPassword } from './pages/auth/ResetPassword';
 import { Dashboard } from './pages/Dashboard';
+import { Search } from './pages/Search';
+import { Settings } from './pages/Settings';
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

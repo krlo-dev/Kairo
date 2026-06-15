@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/auth.store';
@@ -38,9 +38,17 @@ export function Dashboard() {
             Hola, {user.name}
           </h1>
         </div>
-        <button type="button" className="btn-ghost" onClick={onLogout}>
-          Cerrar sesión
-        </button>
+        <nav className="flex items-center gap-3">
+          <Link to="/search" className="btn-primary text-sm">
+            Buscar
+          </Link>
+          <Link to="/settings" className="btn-ghost text-sm">
+            Ajustes
+          </Link>
+          <button type="button" className="btn-ghost text-sm" onClick={onLogout}>
+            Salir
+          </button>
+        </nav>
       </header>
 
       <section className="mt-10 rounded-kairo border border-neutral-200 bg-white p-6 dark:border-kairo-borderDark dark:bg-kairo-surfaceDark">
