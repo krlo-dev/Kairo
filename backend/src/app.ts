@@ -11,6 +11,8 @@ import {
 } from './middleware/index.js';
 import { healthRouter } from './routes/health.routes.js';
 import { authRouter } from './routes/auth.routes.js';
+import { mlRouter } from './routes/ml.routes.js';
+import { searchRouter } from './routes/search.routes.js';
 import { env } from './config/env.js';
 
 export function createApp(): Express {
@@ -72,6 +74,8 @@ export function createApp(): Express {
   // Routes
   app.use('/api', healthRouter);
   app.use('/api', authRouter);
+  app.use('/api', mlRouter);
+  app.use('/api', searchRouter);
 
   // 404 + error handler
   app.use(notFoundHandler);

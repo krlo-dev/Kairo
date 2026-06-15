@@ -3,11 +3,14 @@ import { env } from './config/env.js';
 import { logger } from './logger/pino.js';
 import { initSentry, Sentry } from './logger/sentry.js';
 import { createContainer, disposeContainer } from './config/di.js';
+import { startTokenRefreshJob } from './jobs/tokenRefresh.job.js';
 
 async function main(): Promise<void> {
   initSentry();
   const container = createContainer();
   await container.jobs.start();
+
+  const tokenRefresh = startTokenRefreshJob({ prisma: container.prisma });
 
   const app = createApp();
 
@@ -17,6 +20,7 @@ async function main(): Promise<void> {
 
   const shutdown = async (signal: string): Promise<void> => {
     logger.info({ signal }, 'Shutting down gracefully...');
+    tokenRefresh.stop();
     server.close((err) => {
       if (err) logger.error({ err }, 'Error closing HTTP server');
     });
