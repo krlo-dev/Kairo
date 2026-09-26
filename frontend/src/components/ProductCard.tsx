@@ -5,6 +5,7 @@ interface Props {
   product: UnifiedProduct;
   onTrack?: (p: UnifiedProduct) => void;
   tracking?: boolean;
+  tracked?: boolean;
 }
 
 const SOURCE_BADGE: Record<UnifiedProduct['source'], { label: string; classes: string }> = {
@@ -18,7 +19,7 @@ const SOURCE_BADGE: Record<UnifiedProduct['source'], { label: string; classes: s
   },
 };
 
-export function ProductCard({ product, onTrack, tracking }: Props) {
+export function ProductCard({ product, onTrack, tracking, tracked }: Props) {
   const src = SOURCE_BADGE[product.source];
   const productHref = product.productUrl;
 
@@ -72,10 +73,10 @@ export function ProductCard({ product, onTrack, tracking }: Props) {
           <button
             type="button"
             onClick={() => onTrack(product)}
-            disabled={tracking}
+            disabled={tracking || tracked}
             className="btn-ghost text-sm"
           >
-            {tracking ? 'Siguiendo...' : 'Seguir'}
+            {tracked ? 'Siguiendo ✓' : tracking ? 'Agregando...' : 'Seguir'}
           </button>
         ) : null}
       </div>

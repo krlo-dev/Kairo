@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Field } from '../components/ui/Field';
 import { ProductCard } from '../components/ProductCard';
-import { searchProducts, type SearchParams } from '../lib/search';
+import { searchProducts, type SearchParams, type UnifiedProduct } from '../lib/search';
+import { addTrackedProduct } from '../lib/tracking';
 import { useDebounce } from '../hooks/useDebounce';
 import { errorMessage } from '../lib/errorMessage';
 import { useAuthStore } from '../store/auth.store';
@@ -33,6 +35,30 @@ export function Search() {
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [source, setSource] = useState<'ML' | 'ALIEXPRESS' | 'both'>('both');
   const [page, setPage] = useState(1);
+
+  // key = `${source}-${externalId}`; 'loading' mientras se envía el POST,
+  // 'done' una vez confirmado (así el botón queda en "Siguiendo" y no se
+  // puede duplicar el tracking sin recargar la búsqueda).
+  const [trackState, setTrackState] = useState<Record<string, 'loading' | 'done'>>({});
+
+  const trackKey = (p: UnifiedProduct) => `${p.source}-${p.externalId}`;
+
+  const onTrack = async (product: UnifiedProduct) => {
+    const key = trackKey(product);
+    setTrackState((s) => ({ ...s, [key]: 'loading' }));
+    try {
+      await addTrackedProduct(product);
+      setTrackState((s) => ({ ...s, [key]: 'done' }));
+      toast.success('Producto agregado a tu dashboard.');
+    } catch (err) {
+      setTrackState((s) => {
+        const next = { ...s };
+        delete next[key];
+        return next;
+      });
+      toast.error(errorMessage(err));
+    }
+  };
 
   const dq = useDebounce(q, 300);
   const dmin = useDebounce(minPrice, 400);
@@ -177,7 +203,13 @@ export function Search() {
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {query.data.data.map((p) => (
-                <ProductCard key={`${p.source}-${p.externalId}`} product={p} />
+                <ProductCard
+                  key={trackKey(p)}
+                  product={p}
+                  onTrack={onTrack}
+                  tracking={trackState[trackKey(p)] === 'loading'}
+                  tracked={trackState[trackKey(p)] === 'done'}
+                />
               ))}
             </div>
             {query.data.pagination.totalPages > 1 ? (

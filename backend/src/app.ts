@@ -13,6 +13,7 @@ import { healthRouter } from './routes/health.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { mlRouter } from './routes/ml.routes.js';
 import { searchRouter } from './routes/search.routes.js';
+import { trackingRouter } from './routes/tracking.routes.js';
 import { env } from './config/env.js';
 
 export function createApp(): Express {
@@ -76,6 +77,7 @@ export function createApp(): Express {
   app.use('/api', authRouter);
   app.use('/api', mlRouter);
   app.use('/api', searchRouter);
+  app.use('/api', trackingRouter);
 
   // 404 + error handler
   app.use(notFoundHandler);

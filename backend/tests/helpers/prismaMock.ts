@@ -2,11 +2,11 @@ import { vi } from 'vitest';
 import type { PrismaClient } from '@prisma/client';
 
 // Mock parcial de PrismaClient cubriendo las llamadas que hacen los
-// servicios de auth. No imita transacciones reales: `$transaction(fn)`
-// invoca `fn(prismaMock)` directamente, así los tests pueden inspeccionar
-// los métodos. Para `$transaction(promises[])` también se resuelve en
-// paralelo. No es una DB en memoria — los tests deben configurar return
-// values explícitamente con mockResolvedValueOnce.
+// servicios de auth y tracking. No imita transacciones reales:
+// `$transaction(fn)` invoca `fn(prismaMock)` directamente, así los tests
+// pueden inspeccionar los métodos. Para `$transaction(promises[])` también
+// se resuelve en paralelo. No es una DB en memoria — los tests deben
+// configurar return values explícitamente con mockResolvedValueOnce.
 
 export type PrismaMock = ReturnType<typeof createPrismaMock>;
 
@@ -32,6 +32,13 @@ export function createPrismaMock() {
     passwordResetToken: {
       create: vi.fn(),
       findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    trackedProduct: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
       update: vi.fn(),
     },
     auditLog: {
