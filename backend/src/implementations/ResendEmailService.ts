@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import type {
   AccountLockedParams,
+  AlertTriggeredParams,
   EmailService,
   PasswordResetParams,
   VerifyEmailParams,
@@ -9,6 +10,7 @@ import { env } from '../config/env.js';
 import { logger } from '../logger/pino.js';
 import {
   accountLockedTemplate,
+  alertTriggeredTemplate,
   passwordResetTemplate,
   verifyEmailTemplate,
 } from './emailTemplates.js';
@@ -34,6 +36,18 @@ export class ResendEmailService implements EmailService {
 
   async sendAccountLocked(params: AccountLockedParams): Promise<void> {
     const tpl = accountLockedTemplate(params.name, params.unlockAt);
+    await this.send(params.to, tpl.subject, tpl.html, tpl.text);
+  }
+
+  async sendAlertTriggered(params: AlertTriggeredParams): Promise<void> {
+    const tpl = alertTriggeredTemplate(
+      params.name,
+      params.productTitle,
+      params.productUrl,
+      params.price,
+      params.currency,
+      params.targetPrice,
+    );
     await this.send(params.to, tpl.subject, tpl.html, tpl.text);
   }
 

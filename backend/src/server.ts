@@ -10,7 +10,11 @@ async function main(): Promise<void> {
   const container = createContainer();
   await container.jobs.start();
 
-  const scheduler = startScheduler({ prisma: container.prisma, cache: container.cache });
+  const scheduler = startScheduler({
+    prisma: container.prisma,
+    cache: container.cache,
+    email: container.email,
+  });
 
   const app = createApp();
 

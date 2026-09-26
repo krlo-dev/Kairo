@@ -12,6 +12,9 @@ import {
   YAxis,
 } from 'recharts';
 import { getTrackedProduct, getTrackedProductHistory, removeTrackedProduct } from '../lib/tracking';
+import { listAlerts } from '../lib/alerts';
+import { AlertForm } from '../components/AlertForm';
+import { AlertRow } from '../components/AlertRow';
 import { errorMessage } from '../lib/errorMessage';
 import { formatPrice, type Currency } from '../utils/formatPrice';
 
@@ -27,6 +30,7 @@ export function ProductDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [days, setDays] = useState<(typeof RANGE_OPTIONS)[number]>(30);
+  const [showAlertForm, setShowAlertForm] = useState(false);
 
   const productQuery = useQuery({
     queryKey: ['tracking', 'detail', id],
@@ -37,6 +41,12 @@ export function ProductDetail() {
   const historyQuery = useQuery({
     queryKey: ['tracking', 'history', id, days],
     queryFn: () => getTrackedProductHistory(id!, days),
+    enabled: !!id,
+  });
+
+  const alertsQuery = useQuery({
+    queryKey: ['alerts', 'list', id],
+    queryFn: () => listAlerts(id!),
     enabled: !!id,
   });
 
@@ -54,6 +64,7 @@ export function ProductDetail() {
 
   const product = productQuery.data;
   const history = historyQuery.data ?? [];
+  const alerts = alertsQuery.data ?? [];
   const chartData = history.map((p) => ({
     date: new Date(p.recordedAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }),
     price: p.price,
@@ -175,6 +186,50 @@ export function ProductDetail() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+              </div>
+            )}
+          </section>
+
+          <section className="mt-6 rounded-kairo border border-neutral-200 bg-white p-6 dark:border-kairo-borderDark dark:bg-kairo-surfaceDark">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-kairo-h3 text-neutral-900 dark:text-neutral-50">Alertas</h2>
+              <button
+                type="button"
+                className="btn-ghost text-sm"
+                onClick={() => setShowAlertForm((v) => !v)}
+              >
+                {showAlertForm ? 'Cancelar' : '+ Nueva alerta'}
+              </button>
+            </div>
+
+            {showAlertForm ? (
+              <div className="mb-4 border-b border-neutral-200 pb-4 dark:border-kairo-borderDark">
+                <AlertForm
+                  trackedProductId={id}
+                  onCreated={() => {
+                    setShowAlertForm(false);
+                    void queryClient.invalidateQueries({ queryKey: ['alerts', 'list', id] });
+                  }}
+                />
+              </div>
+            ) : null}
+
+            {alertsQuery.isLoading ? (
+              <p className="py-6 text-center text-kairo-small text-neutral-500">Cargando...</p>
+            ) : alerts.length === 0 ? (
+              <p className="py-6 text-center text-kairo-small text-neutral-500">
+                No tienes alertas para este producto todavía.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {alerts.map((alert) => (
+                  <AlertRow
+                    key={alert.id}
+                    alert={alert}
+                    trackedProductId={id}
+                    currency={product.currency as Currency}
+                  />
+                ))}
               </div>
             )}
           </section>

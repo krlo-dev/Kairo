@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { pollPricesOnce } from '../../../src/jobs/pricePoll.job.js';
 import { createPrismaMock, asPrisma, type PrismaMock } from '../../helpers/prismaMock.js';
+import { createEmailMock, asEmail, type EmailMock } from '../../helpers/emailMock.js';
 import { buildTrackedProduct } from '../../fixtures/trackedProductFactory.js';
 
 function hoursAgo(h: number): Date {
@@ -39,10 +40,12 @@ function makeAe(price = 10) {
 
 describe('pollPricesOnce', () => {
   let prisma: PrismaMock;
+  let email: EmailMock;
 
   beforeEach(() => {
     prisma = createPrismaMock();
     prisma.alert.findMany.mockResolvedValue([]);
+    email = createEmailMock();
   });
 
   it('sin productos activos no hace nada', async () => {
@@ -50,9 +53,21 @@ describe('pollPricesOnce', () => {
     const ml = makeMl();
     const ae = makeAe();
 
-    const summary = await pollPricesOnce({ prisma: asPrisma(prisma), ml, ae });
+    const summary = await pollPricesOnce({
+      prisma: asPrisma(prisma),
+      ml,
+      ae,
+      email: asEmail(email),
+    });
 
-    expect(summary).toEqual({ groups: 0, due: 0, polled: 0, priceChanges: 0, failed: 0 });
+    expect(summary).toEqual({
+      groups: 0,
+      due: 0,
+      polled: 0,
+      priceChanges: 0,
+      failed: 0,
+      alertsFired: 0,
+    });
     expect(ml.getItem).not.toHaveBeenCalled();
   });
 
@@ -70,7 +85,12 @@ describe('pollPricesOnce', () => {
     const ml = makeMl(85000);
     const ae = makeAe();
 
-    const summary = await pollPricesOnce({ prisma: asPrisma(prisma), ml, ae });
+    const summary = await pollPricesOnce({
+      prisma: asPrisma(prisma),
+      ml,
+      ae,
+      email: asEmail(email),
+    });
 
     expect(ml.getItem).toHaveBeenCalledOnce();
     expect(summary.groups).toBe(1);
@@ -90,7 +110,12 @@ describe('pollPricesOnce', () => {
     const ml = makeMl(100); // mismo precio
     const ae = makeAe();
 
-    const summary = await pollPricesOnce({ prisma: asPrisma(prisma), ml, ae });
+    const summary = await pollPricesOnce({
+      prisma: asPrisma(prisma),
+      ml,
+      ae,
+      email: asEmail(email),
+    });
 
     expect(summary.priceChanges).toBe(0);
     expect(prisma.priceHistory.create).not.toHaveBeenCalled();
@@ -105,7 +130,12 @@ describe('pollPricesOnce', () => {
     const ml = makeMl();
     const ae = makeAe();
 
-    const summary = await pollPricesOnce({ prisma: asPrisma(prisma), ml, ae });
+    const summary = await pollPricesOnce({
+      prisma: asPrisma(prisma),
+      ml,
+      ae,
+      email: asEmail(email),
+    });
 
     expect(summary.due).toBe(0);
     expect(ml.getItem).not.toHaveBeenCalled();
@@ -129,7 +159,12 @@ describe('pollPricesOnce', () => {
     const ml = makeMl(95000);
     const ae = makeAe();
 
-    const summary = await pollPricesOnce({ prisma: asPrisma(prisma), ml, ae });
+    const summary = await pollPricesOnce({
+      prisma: asPrisma(prisma),
+      ml,
+      ae,
+      email: asEmail(email),
+    });
 
     expect(summary.due).toBe(1);
     expect(ml.getItem).toHaveBeenCalledOnce();
@@ -148,7 +183,12 @@ describe('pollPricesOnce', () => {
     const ml = makeMl(1);
     const ae = { getItem: vi.fn().mockRejectedValue(new Error('upstream boom')) };
 
-    const summary = await pollPricesOnce({ prisma: asPrisma(prisma), ml, ae });
+    const summary = await pollPricesOnce({
+      prisma: asPrisma(prisma),
+      ml,
+      ae,
+      email: asEmail(email),
+    });
 
     expect(summary.failed).toBe(1);
     expect(summary.polled).toBe(1); // el de ML sí se completó

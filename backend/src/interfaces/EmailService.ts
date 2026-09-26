@@ -16,8 +16,19 @@ export interface AccountLockedParams {
   unlockAt: Date;
 }
 
+export interface AlertTriggeredParams {
+  to: string;
+  name: string;
+  productTitle: string;
+  productUrl: string;
+  price: number;
+  currency: string;
+  targetPrice: number | null;
+}
+
 export interface EmailService {
   sendVerifyEmail(params: VerifyEmailParams): Promise<void>;
   sendPasswordReset(params: PasswordResetParams): Promise<void>;
   sendAccountLocked(params: AccountLockedParams): Promise<void>;
+  sendAlertTriggered(params: AlertTriggeredParams): Promise<void>;
 }

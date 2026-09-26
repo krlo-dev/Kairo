@@ -3,6 +3,8 @@ import cron, { type ScheduledTask } from 'node-cron';
 import { logger } from '../logger/pino.js';
 import type { MercadoLibreService } from '../services/mercadolibre/mercadolibre.service.js';
 import type { AliExpressService } from '../services/aliexpress/aliexpress.service.js';
+import type { EmailService } from '../interfaces/EmailService.js';
+import { checkAndFireAlerts } from '../services/alerts/checkAndFireAlerts.service.js';
 
 // Job: refresca el precio de todos los productos rastreados activos.
 // Schedule: cada hora en punto (`0 * * * *`). SPEC §10 "Polling".
@@ -30,6 +32,7 @@ export interface PricePollDeps {
   prisma: PrismaClient;
   ml: Pick<MercadoLibreService, 'getItem'>;
   ae: Pick<AliExpressService, 'getItem'>;
+  email: EmailService;
 }
 
 interface GroupMember {
@@ -49,6 +52,7 @@ export interface PricePollSummary {
   due: number;
   polled: number;
   priceChanges: number;
+  alertsFired: number;
   failed: number;
 }
 
@@ -59,7 +63,7 @@ export async function pollPricesOnce(deps: PricePollDeps): Promise<PricePollSumm
   });
 
   if (products.length === 0) {
-    return { groups: 0, due: 0, polled: 0, priceChanges: 0, failed: 0 };
+    return { groups: 0, due: 0, polled: 0, priceChanges: 0, alertsFired: 0, failed: 0 };
   }
 
   const alerts = await deps.prisma.alert.findMany({
@@ -117,6 +121,7 @@ export async function pollPricesOnce(deps: PricePollDeps): Promise<PricePollSumm
 
   let polled = 0;
   let priceChanges = 0;
+  let alertsFired = 0;
   let failed = 0;
 
   for (let i = 0; i < dueGroups.length; i += THROTTLE_BATCH_SIZE) {
@@ -132,13 +137,14 @@ export async function pollPricesOnce(deps: PricePollDeps): Promise<PricePollSumm
 
         for (const member of group.members) {
           if (fresh.price === member.lastPrice) continue;
+          const recordedAt = new Date();
           await deps.prisma.priceHistory.create({
             data: {
               trackedProductId: member.trackedProduct.id,
               userId: member.trackedProduct.userId,
               price: fresh.price,
               currency: fresh.currency,
-              recordedAt: new Date(),
+              recordedAt,
             },
           });
           await deps.prisma.trackedProduct.update({
@@ -146,7 +152,21 @@ export async function pollPricesOnce(deps: PricePollDeps): Promise<PricePollSumm
             data: { currentPrice: fresh.price },
           });
           priceChanges += 1;
-          // TODO Fase 5: checkAndFireAlerts(member.trackedProduct.id, fresh.price)
+
+          try {
+            const alertSummary = await checkAndFireAlerts(
+              { prisma: deps.prisma, email: deps.email },
+              member.trackedProduct.id,
+              fresh.price,
+              recordedAt,
+            );
+            alertsFired += alertSummary.fired;
+          } catch (alertErr) {
+            logger.error(
+              { err: alertErr, trackedProductId: member.trackedProduct.id },
+              'pricePoll: checkAndFireAlerts falló, el precio ya quedó actualizado',
+            );
+          }
         }
       } catch (err) {
         failed += 1;
@@ -162,10 +182,17 @@ export async function pollPricesOnce(deps: PricePollDeps): Promise<PricePollSumm
   }
 
   logger.info(
-    { groups: groupsByKey.size, due: dueGroups.length, polled, priceChanges, failed },
+    { groups: groupsByKey.size, due: dueGroups.length, polled, priceChanges, alertsFired, failed },
     'pricePoll batch done',
   );
-  return { groups: groupsByKey.size, due: dueGroups.length, polled, priceChanges, failed };
+  return {
+    groups: groupsByKey.size,
+    due: dueGroups.length,
+    polled,
+    priceChanges,
+    alertsFired,
+    failed,
+  };
 }
 
 function sleep(ms: number): Promise<void> {

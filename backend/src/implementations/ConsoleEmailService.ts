@@ -1,5 +1,6 @@
 import type {
   AccountLockedParams,
+  AlertTriggeredParams,
   EmailService,
   PasswordResetParams,
   VerifyEmailParams,
@@ -31,6 +32,14 @@ export class ConsoleEmailService implements EmailService {
     logger.warn(
       { to: params.to, unlockAt: params.unlockAt.toISOString() },
       '[console-email] account-locked (no Resend configurada)',
+    );
+    return Promise.resolve();
+  }
+
+  async sendAlertTriggered(params: AlertTriggeredParams): Promise<void> {
+    logger.warn(
+      { to: params.to, productTitle: params.productTitle, price: params.price },
+      '[console-email] alert-triggered (no Resend configurada)',
     );
     return Promise.resolve();
   }

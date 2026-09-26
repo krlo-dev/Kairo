@@ -53,6 +53,17 @@ export function createPrismaMock() {
     },
     alert: {
       findMany: vi.fn(),
+      findUnique: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    alertNotification: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
     },
     auditLog: {
       create: vi.fn(),

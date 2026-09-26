@@ -1,6 +1,8 @@
-// Templates HTML simples para Fase 1. Usamos plain strings con escape manual
-// — en Fase 5 (alertas) se migra a react-email cuando llegue el setup
-// completo de templates.
+// Templates HTML simples con escape manual (ver escapeHtml). Se evaluó
+// migrar a react-email en Fase 5, pero el backend no tenía tooling de JSX
+// (no hay React ni configuración .tsx) y meterlo solo para esto era más
+// riesgo/infra que valor — este patrón ya escapa correctamente y está
+// probado, así que Fase 5 (alertas) lo extiende en vez de reemplazarlo.
 
 function escapeHtml(s: string): string {
   return s
@@ -69,5 +71,52 @@ export function accountLockedTemplate(name: string, unlockAt: Date): Wrapped {
      <p>Detectamos 5 intentos de inicio de sesión fallidos. Por seguridad, tu cuenta queda bloqueada hasta <strong>${safeWhen}</strong> (hora de Colombia).</p>
      <p>Si no fuiste tú, te recomendamos cambiar tu contraseña en cuanto la cuenta se desbloquee.</p>`,
     `Hola ${name},\n\nDetectamos 5 intentos fallidos de inicio de sesión. Tu cuenta queda bloqueada hasta ${when} (hora de Colombia).\n\nSi no fuiste tú, cambia tu contraseña al desbloquearse.`,
+  );
+}
+
+const CURRENCY_LOCALE: Record<string, string> = {
+  COP: 'es-CO',
+  USD: 'en-US',
+  MXN: 'es-MX',
+  ARS: 'es-AR',
+  CLP: 'es-CL',
+  BRL: 'pt-BR',
+  PEN: 'es-PE',
+};
+
+function formatMoney(amount: number, currency: string): string {
+  const locale = CURRENCY_LOCALE[currency] ?? 'es-CO';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function alertTriggeredTemplate(
+  name: string,
+  productTitle: string,
+  productUrl: string,
+  price: number,
+  currency: string,
+  targetPrice: number | null,
+): Wrapped {
+  const safeName = escapeHtml(name);
+  const safeTitle = escapeHtml(productTitle);
+  const safeUrl = escapeHtml(productUrl);
+  const priceLabel = formatMoney(price, currency);
+  const targetLabel = targetPrice !== null ? formatMoney(targetPrice, currency) : null;
+
+  return wrap(
+    `Alerta de precio: ${productTitle}`,
+    `<p>Hola ${safeName},</p>
+     <p>Tu alerta se cumplió. El precio de <strong>${safeTitle}</strong> ahora está en <strong>${priceLabel}</strong>${
+       targetLabel ? `, dentro de tu objetivo de ${targetLabel}` : ''
+     }.</p>
+     <p><a href="${safeUrl}" style="display: inline-block; background: #1a1a1a; color: #fff; padding: 12px 20px; text-decoration: none; border-radius: 6px;">Ver producto</a></p>
+     <p style="color: #666; font-size: 14px;">Puedes administrar tus alertas desde tu dashboard de Kairo.</p>`,
+    `Hola ${name},\n\nEl precio de ${productTitle} ahora está en ${priceLabel}${
+      targetLabel ? `, dentro de tu objetivo de ${targetLabel}` : ''
+    }.\n\nVerlo aquí: ${productUrl}`,
   );
 }
