@@ -8,6 +8,7 @@ import { ownership } from '../middleware/ownership.middleware.js';
 import { addTrackedProduct } from '../services/tracking/addTrackedProduct.service.js';
 import { removeTrackedProduct } from '../services/tracking/removeTrackedProduct.service.js';
 import { listTrackedProducts } from '../services/tracking/listTrackedProducts.service.js';
+import { getPriceHistory } from '../services/tracking/getPriceHistory.service.js';
 
 export const trackingRouter = Router();
 
@@ -27,6 +28,10 @@ const addSchema = z.object({
 const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional().default(1),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+});
+
+const historyQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(365).optional().default(30),
 });
 
 trackingRouter.get(
@@ -72,6 +77,23 @@ trackingRouter.post(
 trackingRouter.get('/tracking/:id', requireAuth, ownership('trackedProduct'), (req, res) => {
   res.status(200).json({ data: req.trackedProduct });
 });
+
+trackingRouter.get(
+  '/tracking/:id/history',
+  requireAuth,
+  ownership('trackedProduct'),
+  asyncHandler(async (req, res) => {
+    if (!req.trackedProduct) throw Errors.notFound();
+    const parsed = historyQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      throw Errors.validation('Parámetros inválidos', parsed.error.flatten());
+    }
+
+    const { prisma } = getContainer();
+    const data = await getPriceHistory({ prisma }, req.trackedProduct.id, parsed.data.days);
+    res.status(200).json({ data });
+  }),
+);
 
 trackingRouter.delete(
   '/tracking/:id',

@@ -7,13 +7,15 @@ import type { SearchParams, SearchResult, UnifiedProduct } from '../search/types
 
 // AliExpress Open Platform (TOP) API — gateway único para todos los métodos.
 const API_URL = 'https://api-sg.aliexpress.com/sync';
-const METHOD = 'aliexpress.affiliate.product.query';
+const SEARCH_METHOD = 'aliexpress.affiliate.product.query';
+const DETAIL_METHOD = 'aliexpress.affiliate.productdetail.get';
 const DEFAULT_LIMIT = 30;
 
 // NOTA: la forma exacta de la respuesta se ajusta contra la API real la
 // primera vez que probemos con credenciales de AE Affiliates (ver
 // docs/setup-local.md sección de integraciones externas). Esta forma sigue
-// la documentación pública del método aliexpress.affiliate.product.query.
+// la documentación pública de los métodos aliexpress.affiliate.product.query
+// y aliexpress.affiliate.productdetail.get.
 interface AeProduct {
   product_id: number | string;
   product_title: string;
@@ -30,6 +32,19 @@ interface AeQueryResponse {
       resp_msg?: string;
       result?: {
         total_record_count?: number;
+        products?: { product: AeProduct[] };
+      };
+    };
+  };
+  error_response?: { code?: string; msg?: string };
+}
+
+interface AeDetailResponse {
+  aliexpress_affiliate_productdetail_get_response?: {
+    resp_result?: {
+      resp_code?: number;
+      resp_msg?: string;
+      result?: {
         products?: { product: AeProduct[] };
       };
     };
@@ -77,7 +92,7 @@ export class AliExpressService {
     if (params.minPrice !== undefined) business.min_sale_price = String(params.minPrice);
     if (params.maxPrice !== undefined) business.max_sale_price = String(params.maxPrice);
 
-    const data = await this.callApi<AeQueryResponse>(business);
+    const data = await this.callApi<AeQueryResponse>(business, SEARCH_METHOD);
 
     if (data.error_response) {
       throw new AppError(
@@ -114,12 +129,55 @@ export class AliExpressService {
     return result;
   }
 
-  private async callApi<T>(businessParams: Record<string, string>): Promise<T> {
+  /**
+   * Detalle de un producto por ID — usado por pricePoll.job para refrescar
+   * el precio actual de los productos AliExpress rastreados (Fase 4).
+   */
+  async getItem(externalId: string, country = 'CO'): Promise<UnifiedProduct> {
+    ensureConfigured();
+
+    const cacheKey = `ae:item:${externalId}`;
+    const cached = await this.deps.cache.get<UnifiedProduct>(cacheKey);
+    if (cached) return cached;
+
+    const business: Record<string, string> = {
+      product_ids: externalId,
+      target_currency: 'USD',
+      target_language: 'ES',
+      tracking_id: env.AE_TRACKING_ID,
+    };
+    const data = await this.callApi<AeDetailResponse>(business, DETAIL_METHOD);
+
+    if (data.error_response) {
+      throw new AppError(
+        'upstream_error',
+        502,
+        `AliExpress: ${data.error_response.msg ?? data.error_response.code ?? 'error desconocido'}`,
+      );
+    }
+
+    const respResult = data.aliexpress_affiliate_productdetail_get_response?.resp_result;
+    const product = respResult?.result?.products?.product?.[0];
+    if (!respResult?.result || !product) {
+      throw new AppError(
+        'upstream_error',
+        502,
+        `AliExpress: ${respResult?.resp_msg ?? 'producto no encontrado'}`,
+      );
+    }
+
+    const normalized = this.normalizeProduct(product, country);
+    // TTL más largo: detalle cambia poco entre polls (3h).
+    await this.deps.cache.set(cacheKey, normalized, 3 * 60 * 60);
+    return normalized;
+  }
+
+  private async callApi<T>(businessParams: Record<string, string>, method: string): Promise<T> {
     const allParams: Record<string, string> = {
       app_key: env.AE_APP_KEY,
       timestamp: String(Date.now()),
       sign_method: 'sha256',
-      method: METHOD,
+      method,
       v: '2.0',
       format: 'json',
       ...businessParams,

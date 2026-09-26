@@ -54,3 +54,21 @@ export async function addTrackedProduct(product: UnifiedProduct): Promise<Tracke
 export async function removeTrackedProduct(id: string): Promise<void> {
   await api.delete(`/tracking/${id}`);
 }
+
+export async function getTrackedProduct(id: string): Promise<TrackedProduct> {
+  const res = await api.get<{ data: TrackedProduct }>(`/tracking/${id}`);
+  return res.data.data;
+}
+
+export interface PricePoint {
+  recordedAt: string;
+  price: number;
+  currency: TrackedProduct['currency'];
+}
+
+export async function getTrackedProductHistory(id: string, days = 30): Promise<PricePoint[]> {
+  const res = await api.get<{ data: PricePoint[] }>(`/tracking/${id}/history`, {
+    params: { days },
+  });
+  return res.data.data;
+}

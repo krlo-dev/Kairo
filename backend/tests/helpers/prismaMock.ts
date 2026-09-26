@@ -41,6 +41,19 @@ export function createPrismaMock() {
       create: vi.fn(),
       update: vi.fn(),
     },
+    priceHistory: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+    priceAggregate: {
+      upsert: vi.fn(),
+    },
+    alert: {
+      findMany: vi.fn(),
+    },
     auditLog: {
       create: vi.fn(),
     },

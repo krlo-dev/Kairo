@@ -86,6 +86,59 @@ describe('AliExpressService', () => {
     expect(second.pagination.total).toBe(0);
   });
 
+  it('getItem trae el detalle de un producto por ID y lo normaliza', async () => {
+    mock.pool.intercept({ path: /\/sync\?/, method: 'GET' }).reply(200, {
+      aliexpress_affiliate_productdetail_get_response: {
+        resp_result: {
+          resp_code: 200,
+          result: {
+            products: {
+              product: [
+                {
+                  product_id: 555666,
+                  product_title: 'Mini parlante Bluetooth',
+                  product_main_image_url: 'http://ae/img/2.jpg',
+                  target_sale_price: '9.50',
+                  promotion_link: 'http://ae/promo/555666',
+                },
+              ],
+            },
+          },
+        },
+      },
+    });
+
+    const product = await svc.getItem('555666', 'CO');
+
+    expect(product.externalId).toBe('555666');
+    expect(product.source).toBe('ALIEXPRESS');
+    expect(product.price).toBe(9.5);
+    expect(product.currency).toBe('USD');
+    expect(product.country).toBe('CO');
+  });
+
+  it('getItem usa cache: segunda llamada NO golpea upstream', async () => {
+    mock.pool.intercept({ path: /\/sync\?/, method: 'GET' }).reply(200, {
+      aliexpress_affiliate_productdetail_get_response: {
+        resp_result: { result: { products: { product: [{ product_id: 1, product_title: 'X' }] } } },
+      },
+    });
+
+    await svc.getItem('1', 'CO');
+    const second = await svc.getItem('1', 'CO');
+    expect(second.externalId).toBe('1');
+  });
+
+  it('getItem lanza upstream_error si el producto no existe', async () => {
+    mock.pool.intercept({ path: /\/sync\?/, method: 'GET' }).reply(200, {
+      aliexpress_affiliate_productdetail_get_response: {
+        resp_result: { result: { products: { product: [] } } },
+      },
+    });
+
+    await expect(svc.getItem('no-existe', 'CO')).rejects.toMatchObject({ statusCode: 502 });
+  });
+
   it('propaga error_response de AliExpress como upstream_error', async () => {
     mock.pool.intercept({ path: /\/sync\?/, method: 'GET' }).reply(200, {
       error_response: { code: 'IncompleteSignature', msg: 'Signature verification failed' },

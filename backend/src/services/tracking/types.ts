@@ -20,3 +20,9 @@ export interface TrackingListResult {
     totalPages: number;
   };
 }
+
+export interface PricePoint {
+  recordedAt: Date;
+  price: number;
+  currency: Currency;
+}

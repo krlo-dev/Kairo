@@ -122,14 +122,12 @@ export function Dashboard() {
                     ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <a
-                      href={p.productUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      to={`/tracking/${p.id}`}
                       className="line-clamp-1 text-sm font-medium text-neutral-900 hover:underline dark:text-neutral-100"
                     >
                       {p.title}
-                    </a>
+                    </Link>
                     <p className="mt-0.5 text-kairo-small text-neutral-500">
                       {SOURCE_LABEL[p.source]} ·{' '}
                       {formatPrice(Number(p.currentPrice), p.currency as Currency)}
