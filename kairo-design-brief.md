@@ -35,41 +35,43 @@ Está pensado para ser entregado a una skill de diseño que lo pula y complete.
 
 ### Colores primarios
 
-| Nombre | Hex | Uso |
-|---|---|---|
-| Ámbar Kairo | `#BA7517` | Color principal de marca, CTAs primarios, logo |
-| Ámbar claro | `#EF9F27` | Hover states, acentos, highlights |
-| Navy profundo | `#1a1a2e` | Fondos dark, navbar en modo oscuro |
-| Crema | `#FAEEDA` | Fondos claros, cards en modo claro |
+| Nombre        | Hex       | Uso                                            |
+| ------------- | --------- | ---------------------------------------------- |
+| Ámbar Kairo   | `#BA7517` | Color principal de marca, CTAs primarios, logo |
+| Ámbar claro   | `#EF9F27` | Hover states, acentos, highlights              |
+| Navy profundo | `#1a1a2e` | Fondos dark, navbar en modo oscuro             |
+| Crema         | `#FAEEDA` | Fondos claros, cards en modo claro             |
 
 ### Colores secundarios
 
-| Nombre | Hex | Uso |
-|---|---|---|
-| Ámbar oscuro | `#633806` | Texto sobre fondos claros, iconos |
+| Nombre       | Hex       | Uso                                        |
+| ------------ | --------- | ------------------------------------------ |
+| Ámbar oscuro | `#633806` | Texto sobre fondos claros, iconos          |
 | Dorado suave | `#FAC775` | Bordes, separadores, elementos decorativos |
-| Blanco roto | `#FDFAF5` | Background principal modo claro |
-| Gris neutro | `#6B7280` | Texto secundario, labels |
+| Blanco roto  | `#FDFAF5` | Background principal modo claro            |
+| Gris neutro  | `#6B7280` | Texto secundario, labels                   |
 
 ### Colores semánticos (no cambiar)
 
-| Uso | Color |
-|---|---|
-| Precio bajó / positivo | `#16a34a` (verde) |
-| Precio subió / negativo | `#dc2626` (rojo) |
-| Alerta activa | `#BA7517` (ámbar Kairo) |
-| Info / neutral | `#2563eb` (azul) |
+| Uso                     | Color                   |
+| ----------------------- | ----------------------- |
+| Precio bajó / positivo  | `#16a34a` (verde)       |
+| Precio subió / negativo | `#dc2626` (rojo)        |
+| Alerta activa           | `#BA7517` (ámbar Kairo) |
+| Info / neutral          | `#2563eb` (azul)        |
 
 ---
 
 ## Tipografía
 
 **Fuente principal:** Inter (Google Fonts — gratis)
+
 - Headings: Inter 500 (medium)
 - Body: Inter 400 (regular)
 - Monospace / precios: Inter 600 tabular nums
 
 **Escala tipográfica:**
+
 ```
 h1: 36px / 500 / line-height 1.2
 h2: 28px / 500 / line-height 1.3
@@ -90,12 +92,14 @@ precio: 24px / 600 / tabular-nums
 **Composición:** Ícono del reloj + wordmark "Kairo" en Inter 500.
 
 **Variantes requeridas:**
+
 1. Logo completo horizontal (ícono + wordmark) — versión clara
 2. Logo completo horizontal (ícono + wordmark) — versión oscura
 3. Ícono solo (para favicon, app icon, avatar de redes)
 4. Wordmark solo (para uso en texto)
 
 **Especificaciones del ícono:**
+
 - Fondo: cuadrado con bordes redondeados (rx 10)
 - Color de fondo: `#BA7517` (versión clara) / `#1a1a2e` (versión oscura)
 - Reloj: círculo con manecillas (hora y minutos) sin números
@@ -105,6 +109,7 @@ precio: 24px / 600 / tabular-nums
 - Punto central pequeño en color matching
 
 **Tamaños a exportar:**
+
 - SVG vectorial (escalable)
 - PNG 512x512 (app icon / og image)
 - PNG 192x192 (PWA icon)
@@ -115,6 +120,7 @@ precio: 24px / 600 / tabular-nums
 ## Componentes UI clave
 
 ### Navbar
+
 - Fondo blanco en modo claro / `#1a1a2e` en modo oscuro
 - Logo a la izquierda
 - Links de navegación centrados o a la derecha
@@ -123,6 +129,7 @@ precio: 24px / 600 / tabular-nums
 - Sombra sutil: `0 1px 0 rgba(0,0,0,0.08)`
 
 ### ProductCard
+
 - Card blanca con borde `0.5px solid #e5e7eb`
 - Border radius: 12px
 - Padding: 16px
@@ -134,6 +141,7 @@ precio: 24px / 600 / tabular-nums
 - Botón "Seguir": ghost button con borde ámbar
 
 ### PriceChart
+
 - Librería: Recharts (LineChart)
 - Color de línea: `#BA7517`
 - Área bajo la curva: `#FAEEDA` con opacidad 0.4
@@ -144,20 +152,23 @@ precio: 24px / 600 / tabular-nums
 - Responsive: ocupa el 100% del contenedor
 
 ### AlertForm
+
 - Input de precio objetivo con prefijo "$" y moneda
 - Toggle email (siempre activo en todos los planes)
 - Toggle WhatsApp (deshabilitado y con tooltip "Solo Pro y Comerciante" en plan Free)
 - Botón "Crear alerta" con fondo `#BA7517`
 
 ### PlanBadge
+
 - FREE: gris claro `#f3f4f6` texto `#6b7280`
 - PRO: ámbar claro `#FAEEDA` texto `#633806`
 - COMERCIANTE: navy `#1a1a2e` texto `#FAC775`
 
 ### Botón CTA principal
+
 ```css
-background: #BA7517;
-color: #FAEEDA;
+background: #ba7517;
+color: #faeeda;
 border-radius: 8px;
 padding: 10px 24px;
 font-size: 14px;
@@ -166,10 +177,13 @@ border: none;
 cursor: pointer;
 transition: background 0.15s;
 
-&:hover { background: #633806; }
+&:hover {
+  background: #633806;
+}
 ```
 
 ### Mensaje de adblock (plan Free)
+
 - Banner sutil en la parte inferior de la pantalla, no intrusivo
 - Fondo `#FAEEDA` borde superior `#FAC775`
 - Texto: "Usás un bloqueador de anuncios. Los ads nos ayudan a mantener Kairo gratuito. Podés desactivarlo o pasarte a Pro para una experiencia sin anuncios."
@@ -218,14 +232,14 @@ transition: background 0.15s;
 
 Kairo debe soportar modo oscuro nativo (prefers-color-scheme).
 
-| Elemento | Claro | Oscuro |
-|---|---|---|
-| Background | `#FDFAF5` | `#0f0f1a` |
-| Surface / cards | `#FFFFFF` | `#1a1a2e` |
-| Border | `#e5e7eb` | `#2d2d3d` |
-| Text primary | `#111827` | `#f9fafb` |
-| Text secondary | `#6b7280` | `#9ca3af` |
-| Ámbar Kairo | `#BA7517` | `#EF9F27` (más brillante en dark) |
+| Elemento        | Claro     | Oscuro                            |
+| --------------- | --------- | --------------------------------- |
+| Background      | `#FDFAF5` | `#0f0f1a`                         |
+| Surface / cards | `#FFFFFF` | `#1a1a2e`                         |
+| Border          | `#e5e7eb` | `#2d2d3d`                         |
+| Text primary    | `#111827` | `#f9fafb`                         |
+| Text secondary  | `#6b7280` | `#9ca3af`                         |
+| Ámbar Kairo     | `#BA7517` | `#EF9F27` (más brillante en dark) |
 
 ---
 
@@ -239,4 +253,3 @@ Kairo debe soportar modo oscuro nativo (prefers-color-scheme).
 - El ámbar Kairo es el color de la urgencia y la oportunidad — usarlo con criterio, no decorativamente
 - Todas las transiciones: 150ms ease
 - No usar sombras pesadas — bordes sutiles son suficientes
-

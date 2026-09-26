@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: "0 6 * * 1"
 
 jobs:
   analyze:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript-typescript']
+        language: ["javascript-typescript"]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,4 +31,4 @@ jobs:
 
       - uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{ matrix.language }}'
+          category: "/language:${{ matrix.language }}"

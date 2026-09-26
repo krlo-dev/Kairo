@@ -6,9 +6,9 @@ Referencia inmediata: [`../SPEC.md`](../SPEC.md) sección 7.
 
 ## Endpoints disponibles en Fase 0
 
-| Método | Path | Auth | Descripción |
-|---|---|---|---|
-| GET | `/api/health` | No | Health check (api + database) |
+| Método | Path          | Auth | Descripción                   |
+| ------ | ------------- | ---- | ----------------------------- |
+| GET    | `/api/health` | No   | Health check (api + database) |
 
 ## Próximamente (Fase 1)
 

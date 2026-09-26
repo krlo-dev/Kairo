@@ -2,10 +2,12 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { getContainer } from '../config/di.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { Errors } from '../utils/errors.js';
+import { Errors, AppError } from '../utils/errors.js';
+import { logger } from '../logger/pino.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { MercadoLibreService } from '../services/mercadolibre/mercadolibre.service.js';
-import type { SearchResult } from '../services/search/types.js';
+import { AliExpressService } from '../services/aliexpress/aliexpress.service.js';
+import type { SearchParams, SearchResult, UnifiedProduct } from '../services/search/types.js';
 
 export const searchRouter = Router();
 
@@ -39,28 +41,73 @@ searchRouter.get(
 
     const { cache } = getContainer();
     const ml = new MercadoLibreService({ cache });
+    const ae = new AliExpressService({ cache });
+
+    const searchParams: SearchParams = {
+      q: params.q,
+      country: params.country ?? 'CO',
+      page: params.page,
+      limit: params.limit,
+      ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
+      ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
+    };
 
     let result: SearchResult;
     switch (params.source) {
-      case 'ML':
-      case 'both': {
-        // En Fase 8 (AliExpress) este switch hace merge ML + AE cuando source='both'.
-        // Por ahora 'both' devuelve solo ML para no romper contratos.
-        result = await ml.searchItems({
-          q: params.q,
-          country: params.country ?? 'CO',
-          page: params.page,
-          limit: params.limit,
-          ...(params.minPrice !== undefined ? { minPrice: params.minPrice } : {}),
-          ...(params.maxPrice !== undefined ? { maxPrice: params.maxPrice } : {}),
-        });
+      case 'ML': {
+        result = await ml.searchItems(searchParams);
         break;
       }
       case 'ALIEXPRESS': {
-        throw Errors.validation('Búsqueda AliExpress estará disponible en próxima fase');
+        result = await ae.searchItems(searchParams);
+        break;
+      }
+      case 'both': {
+        // Combina ML + AE. Si una fuente falla (ej. AE sin credenciales
+        // configuradas todavía) no tumba la búsqueda entera — se loguea y
+        // se devuelven los resultados de la fuente que sí respondió.
+        const [mlOutcome, aeOutcome] = await Promise.allSettled([
+          ml.searchItems(searchParams),
+          ae.searchItems(searchParams),
+        ]);
+
+        const data: UnifiedProduct[] = [
+          ...(mlOutcome.status === 'fulfilled' ? mlOutcome.value.data : []),
+          ...(aeOutcome.status === 'fulfilled' ? aeOutcome.value.data : []),
+        ];
+        if (mlOutcome.status === 'rejected') {
+          logger.warn({ err: describeError(mlOutcome.reason) }, 'search both: ML falló');
+        }
+        if (aeOutcome.status === 'rejected') {
+          logger.warn({ err: describeError(aeOutcome.reason) }, 'search both: AliExpress falló');
+        }
+        if (mlOutcome.status === 'rejected' && aeOutcome.status === 'rejected') {
+          throw Errors.internal('No se pudo buscar en ninguna fuente');
+        }
+
+        const total =
+          (mlOutcome.status === 'fulfilled' ? mlOutcome.value.pagination.total : 0) +
+          (aeOutcome.status === 'fulfilled' ? aeOutcome.value.pagination.total : 0);
+
+        result = {
+          data,
+          pagination: {
+            page: params.page,
+            limit: params.limit,
+            total,
+            totalPages: Math.max(1, Math.ceil(total / params.limit)),
+          },
+        };
+        break;
       }
     }
 
     res.status(200).json(result);
   }),
 );
+
+function describeError(err: unknown): { code: string; message: string } {
+  if (err instanceof AppError) return { code: err.code, message: err.message };
+  if (err instanceof Error) return { code: 'unknown_error', message: err.message };
+  return { code: 'unknown_error', message: String(err) };
+}

@@ -35,10 +35,7 @@ const config: Config = {
         'kairo-h4': ['18px', { lineHeight: '1.4', fontWeight: '500' }],
         'kairo-body': ['15px', { lineHeight: '1.7', fontWeight: '400' }],
         'kairo-small': ['13px', { lineHeight: '1.5', fontWeight: '400' }],
-        'kairo-label': [
-          '11px',
-          { lineHeight: '1.5', fontWeight: '500', letterSpacing: '0.06em' },
-        ],
+        'kairo-label': ['11px', { lineHeight: '1.5', fontWeight: '500', letterSpacing: '0.06em' }],
         'kairo-price': ['24px', { lineHeight: '1.2', fontWeight: '600' }],
       },
       borderRadius: {

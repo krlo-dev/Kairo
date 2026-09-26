@@ -31,6 +31,7 @@ export function Search() {
   const [country, setCountry] = useState(allowedCountries[0] ?? 'CO');
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
+  const [source, setSource] = useState<'ML' | 'ALIEXPRESS' | 'both'>('both');
   const [page, setPage] = useState(1);
 
   const dq = useDebounce(q, 300);
@@ -42,11 +43,12 @@ export function Search() {
     return {
       q: dq.trim(),
       country,
+      source,
       page,
       ...(dmin ? { minPrice: Number(dmin) } : {}),
       ...(dmax ? { maxPrice: Number(dmax) } : {}),
     };
-  }, [dq, country, dmin, dmax, page]);
+  }, [dq, country, source, dmin, dmax, page]);
 
   const query = useQuery({
     queryKey: ['search', params],
@@ -79,7 +81,24 @@ export function Search() {
             setPage(1);
           }}
         />
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <label className="block text-kairo-small font-medium text-neutral-700 dark:text-neutral-200">
+              Fuente
+            </label>
+            <select
+              value={source}
+              onChange={(e) => {
+                setSource(e.target.value as 'ML' | 'ALIEXPRESS' | 'both');
+                setPage(1);
+              }}
+              className="mt-1 block w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 text-kairo-body text-neutral-900 focus:border-kairo-amber focus:outline-none focus:ring-2 focus:ring-kairo-amber/30 dark:border-kairo-borderDark dark:bg-kairo-navy dark:text-neutral-50"
+            >
+              <option value="both">Mercado Libre + AliExpress</option>
+              <option value="ML">Solo Mercado Libre</option>
+              <option value="ALIEXPRESS">Solo AliExpress</option>
+            </select>
+          </div>
           <div>
             <label className="block text-kairo-small font-medium text-neutral-700 dark:text-neutral-200">
               País

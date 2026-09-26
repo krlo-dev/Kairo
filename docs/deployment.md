@@ -11,12 +11,14 @@
 ## Setup inicial (una sola vez)
 
 ### 1. Dominio
+
 1. Comprar `kairo.com.co` (registrar nacional o internacional).
 2. En Cloudflare: agregar el sitio en free plan, copiar los 2 nameservers.
 3. En el registrar: cambiar nameservers a los de Cloudflare.
 4. Esperar propagación (15min - 24h).
 
 ### 2. Cloudflare DNS
+
 - `A` record `@` → IP del servidor Hostinger
 - `CNAME` `www` → `kairo.com.co`
 - `CNAME` `api` → `kairo.com.co` (si se separa subdominio API)
@@ -25,12 +27,15 @@
 - WAF: dejar managed rules + bot fight mode
 
 ### 3. DNS para Resend
+
 Una vez creada la cuenta Resend y agregado el dominio, copiar a Cloudflare DNS:
+
 - `TXT` `_dmarc` → `v=DMARC1; p=quarantine; rua=mailto:dmarc@kairo.com.co`
 - `TXT` `@` SPF → `v=spf1 include:spf.resend.com -all`
 - `CNAME` DKIM (3 records provistos por Resend)
 
 ### 4. Hostinger Managed Node.js
+
 1. Panel Hostinger → Avanzado → Managed Node.js.
 2. Crear app: Node 20, directorio `/public_html/kairo`.
 3. Conectar git: clonar `https://github.com/krlo-dev/Kairo`.
@@ -39,6 +44,7 @@ Una vez creada la cuenta Resend y agregado el dominio, copiar a Cloudflare DNS:
 6. Reload on file change: no (manejado por deploy script).
 
 ### 5. MySQL
+
 1. Panel Hostinger → MySQL Databases → crear DB `kairo` + usuario.
 2. `DATABASE_URL` apunta al host privado de Hostinger.
 3. Conectar SSH y correr: `cd backend && npx prisma migrate deploy`.
@@ -51,6 +57,7 @@ Una vez creada la cuenta Resend y agregado el dominio, copiar a Cloudflare DNS:
 ```
 
 Internamente:
+
 1. `git push origin main` (CI corre lint + test + build)
 2. SSH a Hostinger
 3. `cd /public_html/kairo && git pull origin main`
@@ -63,6 +70,7 @@ Internamente:
 ## Variables de entorno en Hostinger
 
 Cargar TODAS las de `backend/.env.example` con sus valores reales en el panel:
+
 - Secretos generados con `openssl rand -hex 32`
 - `NODE_ENV=production`
 - `APP_URL=https://kairo.com.co`
@@ -95,10 +103,10 @@ Migración rollback: `prisma migrate resolve --rolled-back <migration_name>` (cu
 
 ## Monitoring
 
-| Servicio | Función | Plan |
-|---|---|---|
-| Sentry | Errores backend + frontend | Free |
-| Uptime Robot | Uptime + alertas email | Free (5min check) |
-| Cloudflare Analytics | Tráfico edge | Free |
-| Plausible | Analytics product | Paid (~USD 9/mes) o self-hosted |
-| (futuro v.2) Grafana Cloud | Métricas APM | Free tier |
+| Servicio                   | Función                    | Plan                            |
+| -------------------------- | -------------------------- | ------------------------------- |
+| Sentry                     | Errores backend + frontend | Free                            |
+| Uptime Robot               | Uptime + alertas email     | Free (5min check)               |
+| Cloudflare Analytics       | Tráfico edge               | Free                            |
+| Plausible                  | Analytics product          | Paid (~USD 9/mes) o self-hosted |
+| (futuro v.2) Grafana Cloud | Métricas APM               | Free tier                       |

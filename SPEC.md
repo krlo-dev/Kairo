@@ -14,43 +14,44 @@ Kairo permite a usuarios LATAM rastrear precios de productos en Mercado Libre y 
 
 **Tres planes:**
 
-| Plan | Productos | Fuentes | Países ML | Canales alerta | Trending | CSV/Márgenes | Anuncios |
-|---|---|---|---|---|---|---|---|
-| FREE | 3 (bloqueados 30 días desde alta por producto) | ML | CO | email | ❌ | ❌ | ✅ |
-| PRO | 50 | ML + AE | CO, MX, AR, CL, BR, PE | email + WhatsApp | ✅ por categoría | ❌ | ❌ |
-| COMERCIANTE | Ilimitados | ML + AE | LATAM completo | email + WhatsApp | ✅ + LATAM cruzado | ✅ | ❌ |
+| Plan        | Productos                                      | Fuentes | Países ML              | Canales alerta   | Trending           | CSV/Márgenes | Anuncios |
+| ----------- | ---------------------------------------------- | ------- | ---------------------- | ---------------- | ------------------ | ------------ | -------- |
+| FREE        | 3 (bloqueados 30 días desde alta por producto) | ML      | CO                     | email            | ❌                 | ❌           | ✅       |
+| PRO         | 50                                             | ML + AE | CO, MX, AR, CL, BR, PE | email + WhatsApp | ✅ por categoría   | ❌           | ❌       |
+| COMERCIANTE | Ilimitados                                     | ML + AE | LATAM completo         | email + WhatsApp | ✅ + LATAM cruzado | ✅           | ❌       |
 
 ---
 
 ## 2. Decisiones técnicas (locked-in)
 
-| Decisión | Elección |
-|---|---|
-| Lenguaje | **TypeScript** estricto (backend + frontend) |
-| Procesador de pagos | **MercadoPago** (Checkout Pro + preapproval). DIAN factura electrónica via Alegra/Siigo en v.1.5 |
-| Hosting v.1 | **Hostinger Business + Managed Node.js + MySQL 8 Hostinger** |
-| Auth | JWT en **httpOnly + Secure + SameSite=Lax cookies** + CSRF double-submit. **NUNCA en localStorage.** |
-| Cache | `lru-cache` in-memory (Redis llega en v.2 con la migración a VPS) |
-| Cola de jobs | Tabla `Job` en MySQL + worker in-proc + `node-cron` (BullMQ llega en v.2) |
-| HTTP client servidor | `undici` con pool + retry + backoff |
-| Email | **Resend** + templates con `react-email` (escape automático) |
-| WhatsApp | **Meta Cloud API v18+** con templates aprobadas + opt-in legal |
-| Logging | **Pino** structured JSON + redacción PII |
-| Error tracking | **Sentry** (free tier inicial) |
-| Métricas | `prom-client` + push opcional a Grafana Cloud free tier |
-| Tests | **Vitest** + **Supertest** + factories + tests de integración con DB de prueba |
-| Lint/format | ESLint + Prettier + Husky pre-commit |
-| CDN | Cloudflare free tier delante del dominio (DDoS básico + WAF) + CDN gratis de Hostinger para estáticos |
-| CI/CD | GitHub Actions: lint + test + build en cada PR. Deploy via SSH script + `prisma migrate deploy` + restart Passenger |
-| Plan FREE bloqueo | `lockedUntil = addedAt + 30 días` por producto (no calendario) |
-| Alertas | Configurables: `mode` (ONE_SHOT default \| RECURRING con cooldownDays) + `direction` (DOWN default \| UP \| PCT) |
-| Plan v.2 / Amazon / VPS | Documentado en sección 14, NO se construye en v.1 |
+| Decisión                | Elección                                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Lenguaje                | **TypeScript** estricto (backend + frontend)                                                                        |
+| Procesador de pagos     | **MercadoPago** (Checkout Pro + preapproval). DIAN factura electrónica via Alegra/Siigo en v.1.5                    |
+| Hosting v.1             | **Hostinger Business + Managed Node.js + MySQL 8 Hostinger**                                                        |
+| Auth                    | JWT en **httpOnly + Secure + SameSite=Lax cookies** + CSRF double-submit. **NUNCA en localStorage.**                |
+| Cache                   | `lru-cache` in-memory (Redis llega en v.2 con la migración a VPS)                                                   |
+| Cola de jobs            | Tabla `Job` en MySQL + worker in-proc + `node-cron` (BullMQ llega en v.2)                                           |
+| HTTP client servidor    | `undici` con pool + retry + backoff                                                                                 |
+| Email                   | **Resend** + templates con `react-email` (escape automático)                                                        |
+| WhatsApp                | **Meta Cloud API v18+** con templates aprobadas + opt-in legal                                                      |
+| Logging                 | **Pino** structured JSON + redacción PII                                                                            |
+| Error tracking          | **Sentry** (free tier inicial)                                                                                      |
+| Métricas                | `prom-client` + push opcional a Grafana Cloud free tier                                                             |
+| Tests                   | **Vitest** + **Supertest** + factories + tests de integración con DB de prueba                                      |
+| Lint/format             | ESLint + Prettier + Husky pre-commit                                                                                |
+| CDN                     | Cloudflare free tier delante del dominio (DDoS básico + WAF) + CDN gratis de Hostinger para estáticos               |
+| CI/CD                   | GitHub Actions: lint + test + build en cada PR. Deploy via SSH script + `prisma migrate deploy` + restart Passenger |
+| Plan FREE bloqueo       | `lockedUntil = addedAt + 30 días` por producto (no calendario)                                                      |
+| Alertas                 | Configurables: `mode` (ONE_SHOT default \| RECURRING con cooldownDays) + `direction` (DOWN default \| UP \| PCT)    |
+| Plan v.2 / Amazon / VPS | Documentado en sección 14, NO se construye en v.1                                                                   |
 
 ---
 
 ## 3. Stack v.1 — completo
 
 ### Backend
+
 - Node.js 20 LTS
 - TypeScript 5+ (strict, noImplicitAny, exactOptionalPropertyTypes)
 - Express 4
@@ -70,6 +71,7 @@ Kairo permite a usuarios LATAM rastrear precios de productos en Mercado Libre y 
 - `crypto` nativo + AES-256-GCM para cifrar tokens OAuth en DB
 
 ### Frontend
+
 - React 18 + Vite + TypeScript
 - React Router v6
 - Zustand (auth + UI state) + TanStack Query (server state, cache, mutations)
@@ -83,6 +85,7 @@ Kairo permite a usuarios LATAM rastrear precios de productos en Mercado Libre y 
 - `@sentry/react`
 
 ### Infraestructura v.1
+
 - Hostinger Business + Managed Node.js (single Passenger process)
 - MySQL 8 en Hostinger (misma instancia, separar en v.2)
 - CDN gratis Hostinger + Cloudflare free tier delante
@@ -707,6 +710,7 @@ RATE_LIMIT_API_MAX=120
 ```
 
 **Reglas:**
+
 - Nunca commit de `.env`. `.env.example` siempre actualizado.
 - Validación al boot con `zod` (en `src/config/env.ts`). App no arranca si falta una var requerida.
 - En producción: variables se cargan en panel Hostinger Managed Node.js, no en archivo.
@@ -718,6 +722,7 @@ RATE_LIMIT_API_MAX=120
 Todos los endpoints autenticados requieren cookie `accessToken` + header `X-CSRF-Token` (excepto GETs que solo requieren cookie). Responses son JSON.
 
 ### Auth
+
 ```
 POST   /api/auth/register          { email, password, name } → 201 + envía email de verificación
 POST   /api/auth/verify-email      { token } → 200 + emailVerified=true
@@ -730,6 +735,7 @@ GET    /api/auth/me                → 200 { user, plan, subscription }
 ```
 
 ### Mercado Libre OAuth
+
 ```
 GET    /api/auth/ml/connect        → 302 redirect a ML con state + PKCE
 GET    /api/auth/ml/callback       ?code&state → 302 a /settings con success/error
@@ -737,6 +743,7 @@ DELETE /api/auth/ml                → revoca token y elimina MLOAuthToken
 ```
 
 ### Búsqueda
+
 ```
 GET    /api/search?q=&source=&country=&minPrice=&maxPrice=&page=
        source=ml|aliexpress|both (default según plan)
@@ -744,6 +751,7 @@ GET    /api/search?q=&source=&country=&minPrice=&maxPrice=&page=
 ```
 
 ### Tracking
+
 ```
 GET    /api/tracking?page=&limit=          → lista paginada
 POST   /api/tracking                       { externalId, source, ... }
@@ -753,6 +761,7 @@ GET    /api/tracking/:id/history?days=
 ```
 
 ### Alertas
+
 ```
 GET    /api/alerts
 POST   /api/alerts                         { trackedProductId, mode, direction, targetPrice?, pctThreshold?, cooldownDays?, notifyEmail, notifyWhatsapp }
@@ -761,12 +770,14 @@ DELETE /api/alerts/:id                     (ownership)
 ```
 
 ### Trending
+
 ```
 GET    /api/trending?country=&category=    (requirePlan('PRO', 'COMERCIANTE'))
                                             country=ALL solo COMERCIANTE
 ```
 
 ### Billing
+
 ```
 GET    /api/billing/plans
 POST   /api/billing/checkout               { plan } → { initPoint } (URL MercadoPago)
@@ -777,6 +788,7 @@ POST   /api/billing/webhook                (MercadoPago — verifica HMAC + idem
 ```
 
 ### WhatsApp
+
 ```
 POST   /api/whatsapp/opt-in                { phone } → envía template kairo_optin
 POST   /api/whatsapp/confirm               { code } → marca whatsappVerified
@@ -785,12 +797,14 @@ GET    /api/whatsapp/webhook               (Meta verification challenge)
 ```
 
 ### Sistema
+
 ```
 GET    /api/health                         { status, db, cache, version }
 GET    /metrics                            (prom-client, protegido por token)
 ```
 
 **Convenciones de respuesta:**
+
 - Éxito: `{ data: ... }` o resource directo
 - Error: `{ error: { code: 'snake_case', message: 'humano', details?: {} } }`
 - Status codes estándar (200, 201, 204, 400, 401, 403, 404, 409, 422, 429, 500)
@@ -803,23 +817,26 @@ GET    /metrics                            (prom-client, protegido por token)
 ### 8.1 Mercado Libre
 
 **OAuth flow:**
+
 1. `GET /api/auth/ml/connect`: genera `state` (32 bytes random) + `code_verifier` PKCE → guarda en cookie httpOnly corta (5min) → redirige a `https://auth.mercadolibre.com.co/authorization?response_type=code&client_id=ML_APP_ID&redirect_uri=...&state=...&code_challenge=...&code_challenge_method=S256`
 2. `GET /api/auth/ml/callback`: valida `state` contra cookie, intercambia `code` por tokens en `https://api.mercadolibre.com/oauth/token` con `code_verifier`
 3. Cifra `access_token` + `refresh_token` con AES-256-GCM (clave en `ENCRYPTION_KEY`) y guarda en `MLOAuthToken`
 4. `tokenRefresh.job` corre cada hora: refresca tokens que expiran en <30min
 
 **Uso de tokens:**
+
 - **Búsqueda pública** (`/sites/MCO/search`, `/sites/MCO/trends`): NO requiere OAuth de usuario → usar app-only token (cacheado en memoria, refresh on-demand)
 - **Item detail + tracking** (`/items/:id`): requiere token del usuario que rastrea (cada user usa el suyo)
 - Si un user borra su token ML, sus productos quedan "huérfanos" → fallback a app-only para sólo precio (sin detalles privados)
 
 **Service multi-user (patrón obligatorio — usar token del usuario, nunca global):**
+
 ```typescript
 // services/integrations/mercadolibre/client.ts
 export async function fetchItemForUser(userId: string, itemId: string) {
-  const token = await getDecryptedToken(userId);   // de MLOAuthToken cifrado
+  const token = await getDecryptedToken(userId); // de MLOAuthToken cifrado
   return undici.request(`https://api.mercadolibre.com/items/${itemId}`, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 ```
@@ -827,9 +844,15 @@ export async function fetchItemForUser(userId: string, itemId: string) {
 **Backoff:** HTTP 429 → retry exponencial (1s, 4s, 16s) hasta 3 veces. Si falla, log + marca producto con `lastSyncError`.
 
 **Sites soportados:**
+
 ```typescript
 const ML_SITES: Record<string, string> = {
-  CO: 'MCO', MX: 'MLM', AR: 'MLA', CL: 'MLC', BR: 'MLB', PE: 'MPE'
+  CO: "MCO",
+  MX: "MLM",
+  AR: "MLA",
+  CL: "MLC",
+  BR: "MLB",
+  PE: "MPE",
 };
 ```
 
@@ -847,11 +870,13 @@ const ML_SITES: Record<string, string> = {
 ### 8.3 WhatsApp Cloud API
 
 **Templates necesarias (aprobar en Meta antes de fase 7):**
+
 - `kairo_optin` (utility): "Hola {{1}}, recibirás alertas de precio en este número. Responde SI para confirmar o STOP para cancelar."
 - `kairo_price_alert` (utility): "El precio de {{1}} bajó a ${{2}}. Ver: {{3}}"
 - `kairo_welcome` (marketing, opcional): "Bienvenido a Kairo. Tu primera alerta lista en {{1}}"
 
 **Opt-in legal (obligatorio Meta + Ley CO):**
+
 1. User agrega número en Settings → server normaliza E.164 → envía template `kairo_optin`
 2. User responde "SI" (vía webhook) o confirma en la app
 3. Registro en `WhatsAppOptIn` con `optedInAt`, `method`, `ip`, `userAgent`
@@ -868,6 +893,7 @@ const ML_SITES: Record<string, string> = {
 ### 8.4 MercadoPago
 
 **Flow de suscripción:**
+
 1. User elige plan en `/pricing` → `POST /api/billing/checkout` con `{ plan: 'PRO' }`
 2. Server crea `preapproval` en MercadoPago (`POST /preapproval`) → recibe `init_point`
 3. User completa pago en MP (redirect)
@@ -875,11 +901,13 @@ const ML_SITES: Record<string, string> = {
 5. Server: verifica firma HMAC con `MP_WEBHOOK_SECRET`, valida idempotencia con `WebhookEvent`, actualiza `Subscription` + `User.plan`
 
 **Eventos manejados:**
+
 - `payment.created` → crea `Payment(status=PENDING)`
 - `payment.updated` → actualiza `Payment.status` y, si APPROVED, marca `Subscription.status=ACTIVE`
 - `subscription_preapproval.updated` → cambios de estado, cancelaciones
 
 **State machine de Subscription:**
+
 ```
 INCOMPLETE → (pago aprobado) → ACTIVE
 ACTIVE → (cancelAtPeriodEnd=true) → ACTIVE hasta currentPeriodEnd → CANCELED
@@ -889,6 +917,7 @@ CANCELED → (re-upgrade) → nueva Subscription (INCOMPLETE → ACTIVE)
 ```
 
 **Downgrade reglas:**
+
 - Downgrade aplica al **fin del período actual** (no inmediato).
 - Si downgrade a FREE y tiene >3 productos: mantener los 3 más recientes activos, marcar el resto `isActive=false` con email notificando.
 - WhatsApp se desactiva inmediato si el nuevo plan no lo incluye.
@@ -907,6 +936,7 @@ CANCELED → (re-upgrade) → nueva Subscription (INCOMPLETE → ACTIVE)
 ## 9. Seguridad — checklist obligatorio antes de cada deploy
 
 ### Auth & sesiones
+
 1. JWT en `httpOnly + Secure + SameSite=Lax` cookies. Nunca en localStorage.
 2. CSRF: token double-submit (cookie no-httpOnly + header `X-CSRF-Token`) en todas las mutations.
 3. Refresh token rotation: cada uso revoca el anterior y emite uno nuevo. Almacenar `tokenHash` (SHA-256), nunca el token raw.
@@ -917,53 +947,63 @@ CANCELED → (re-upgrade) → nueva Subscription (INCOMPLETE → ACTIVE)
 8. Mensajes genéricos en login y forgot-password ("Si el email existe, te enviamos un enlace") para evitar enumeration.
 
 ### Authorization
+
 9. Middleware `ownership` aplicado a TODA ruta `/:id` que toque recursos de usuario. Patrón: `app.delete('/tracking/:id', auth, ownership('trackedProduct'), handler)`.
 10. Middleware `requirePlan('PRO', 'COMERCIANTE')` en rutas premium. Validar también en frontend para UX pero NUNCA confiar solo en frontend.
 
 ### Crypto
+
 11. Tokens OAuth ML cifrados con AES-256-GCM. Clave en `ENCRYPTION_KEY` (32 bytes hex). Helper en `utils/crypto.ts`.
 12. Passwords con bcrypt cost 12.
 13. Nunca log de passwords ni de tokens. Pino configurado con `redact` para `password`, `token`, `accessToken`, `refreshToken`, `authorization`.
 
 ### Network & headers
+
 14. **Helmet** con `contentSecurityPolicy` estricto (allow `'self'`, Sentry, Plausible, Hostinger CDN, Cloudflare).
 15. **HSTS** con `maxAge: 63072000; includeSubDomains; preload`.
 16. CORS: whitelist exacta (`https://kairo.com.co`, staging si existe). No usar `*`.
 17. Cloudflare free tier delante del dominio: WAF managed rules + bot fight mode + rate limit básico.
 
 ### Rate limiting
+
 18. `/api/auth/*` (login, forgot, reset, register): 10 req/15min por IP **y** 5 req/15min por email.
 19. Resto `/api/*` autenticado: 120 req/min por user. Endpoints de búsqueda: 30 req/min por user.
 20. Webhook endpoints sin rate limit (vienen de proveedores conocidos), pero IP whitelist si el proveedor publica rangos.
 
 ### Inputs y outputs
+
 21. `zod` valida body, query, params en cada endpoint. Schema en archivo del route.
 22. Templates de email con `react-email` (escape JSX automático). Nunca interpolar HTML raw.
 23. Frontend nunca usa `dangerouslySetInnerHTML` con contenido de productos (vienen de fuentes no confiables).
 
 ### Webhooks
+
 24. Idempotencia: tabla `WebhookEvent` con `@@unique([provider, externalId])`. Si ya existe → 200 OK sin re-procesar.
 25. Firma verificada en cada webhook:
     - MercadoPago: HMAC-SHA256 con `MP_WEBHOOK_SECRET`
     - WhatsApp: header `X-Hub-Signature-256` HMAC con `WA_APP_SECRET`
 
 ### OAuth
+
 26. `state` parameter en OAuth ML, validado contra cookie httpOnly corta. Sin esto, atacante puede vincular su cuenta ML a la víctima.
 27. PKCE (`S256`) en OAuth ML.
 
 ### Logging & auditoría
+
 28. Pino structured logging con `requestId` (UUID por request) propagado vía AsyncLocalStorage.
 29. Audit log de: login (exitoso y fallido), password change, plan change, account delete, ML connect/disconnect, WhatsApp opt-in/out.
 30. Errores 5xx → Sentry con contexto (`requestId`, `userId` si autenticado, sin PII).
 31. Logs NO contienen: passwords, tokens, refresh tokens, números de tarjeta, CVV. Emails parcialmente enmascarados (`c***@gmail.com`) cuando se logean.
 
 ### Legal
+
 32. Política de privacidad, términos de servicio, política de cookies publicados en `/legal/*` antes del primer user real.
 33. Cookie banner (Plausible no requiere cookies pero el banner aclara analytics + cookies funcionales).
 34. Footer con aviso de affiliate links (AliExpress).
 35. Flow de "eliminar mi cuenta" funcional: soft delete + email confirmando + opción de descargar datos antes de borrar.
 
 ### Misc
+
 36. `prisma migrate deploy` (no `dev`) en producción.
 37. Backups: Hostinger daily + descarga semanal manual o automática a S3/Backblaze. **Restore probado mensualmente.**
 38. Graceful shutdown: `SIGTERM` → drena requests en curso + cierra Prisma → exit. Importante para deploys sin downtime.
@@ -974,6 +1014,7 @@ CANCELED → (re-upgrade) → nueva Subscription (INCOMPLETE → ACTIVE)
 ## 10. Lógica de negocio — reglas
 
 ### Plan FREE — bloqueo de productos
+
 - Al agregar: `lockedUntil = addedAt + 30 días` (NO calendario mensual).
 - Eliminar antes de `lockedUntil`: 403 `product_locked`.
 - Después de `lockedUntil`: user puede eliminar y agregar otro (cuenta a su cupo de 3).
@@ -981,33 +1022,41 @@ CANCELED → (re-upgrade) → nueva Subscription (INCOMPLETE → ACTIVE)
 
 ```typescript
 // services/tracking/addTrackedProduct.ts
-export async function addTrackedProduct(userId: string, input: AddTrackingInput) {
+export async function addTrackedProduct(
+  userId: string,
+  input: AddTrackingInput,
+) {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
   const limits = PLAN_LIMITS[user.plan];
 
   const activeCount = await prisma.trackedProduct.count({
-    where: { userId, isActive: true }
+    where: { userId, isActive: true },
   });
   if (activeCount >= limits.maxTrackedProducts) {
-    throw new AppError('limit_reached', 403,
-      `Tu plan permite rastrear hasta ${limits.maxTrackedProducts} productos.`);
+    throw new AppError(
+      "limit_reached",
+      403,
+      `Tu plan permite rastrear hasta ${limits.maxTrackedProducts} productos.`,
+    );
   }
 
   if (!limits.sources.includes(input.source)) {
-    throw new AppError('source_not_allowed', 403);
+    throw new AppError("source_not_allowed", 403);
   }
 
-  const lockedUntil = user.plan === 'FREE'
-    ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    : null;
+  const lockedUntil =
+    user.plan === "FREE"
+      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : null;
 
   return prisma.trackedProduct.create({
-    data: { ...input, userId, lockedUntil }
+    data: { ...input, userId, lockedUntil },
   });
 }
 ```
 
 ### Alertas
+
 - `mode: ONE_SHOT` (default): se dispara una vez, `triggered=true` permanente. UI muestra "Disparada — crear nueva".
 - `mode: RECURRING`: se vuelve a disparar si `lastTriggeredAt < now - cooldownDays` y la condición se cumple. Default `cooldownDays=7`.
 - `direction: DOWN` (default): dispara cuando `price <= targetPrice`.
@@ -1019,6 +1068,7 @@ export async function addTrackedProduct(userId: string, input: AddTrackingInput)
 - Reintentos de delivery: 3 con backoff exponencial (1min, 5min, 30min). Tras fallo final → `status=FAILED` + log.
 
 ### Polling
+
 - `pricePoll.job` corre cada hora via `node-cron`.
 - Dedup por `(externalId, source)`: si N usuarios rastrean el mismo producto, 1 sola llamada API.
 - Throttling explícito: máx 60 req/min hacia ML + 60 req/min hacia AE (configurables).
@@ -1032,13 +1082,14 @@ export async function addTrackedProduct(userId: string, input: AddTrackingInput)
 - Job `cleanup.job` corre cada noche 3am: archiva `PriceHistory` >90 días en `PriceAggregate` (rollup diario) y elimina los originales.
 
 ### Plan limits — `utils/planLimits.ts`
+
 ```typescript
 export const PLAN_LIMITS = {
   FREE: {
     maxTrackedProducts: 3,
-    sources: ['ML'] as const,
-    countries: ['CO'] as const,
-    alertChannels: ['email'] as const,
+    sources: ["ML"] as const,
+    countries: ["CO"] as const,
+    alertChannels: ["email"] as const,
     canSeeTrending: false,
     trendingByCategory: false,
     trendingAllLatam: false,
@@ -1049,9 +1100,9 @@ export const PLAN_LIMITS = {
   },
   PRO: {
     maxTrackedProducts: 50,
-    sources: ['ML', 'ALIEXPRESS'] as const,
-    countries: ['CO', 'MX', 'AR', 'CL', 'BR', 'PE'] as const,
-    alertChannels: ['email', 'whatsapp'] as const,
+    sources: ["ML", "ALIEXPRESS"] as const,
+    countries: ["CO", "MX", "AR", "CL", "BR", "PE"] as const,
+    alertChannels: ["email", "whatsapp"] as const,
     canSeeTrending: true,
     trendingByCategory: true,
     trendingAllLatam: false,
@@ -1062,9 +1113,9 @@ export const PLAN_LIMITS = {
   },
   COMERCIANTE: {
     maxTrackedProducts: Infinity,
-    sources: ['ML', 'ALIEXPRESS'] as const,
-    countries: ['CO', 'MX', 'AR', 'CL', 'BR', 'PE', 'ALL'] as const,
-    alertChannels: ['email', 'whatsapp'] as const,
+    sources: ["ML", "ALIEXPRESS"] as const,
+    countries: ["CO", "MX", "AR", "CL", "BR", "PE", "ALL"] as const,
+    alertChannels: ["email", "whatsapp"] as const,
     canSeeTrending: true,
     trendingByCategory: true,
     trendingAllLatam: true,
@@ -1081,11 +1132,13 @@ export const PLAN_LIMITS = {
 ## 11. Convenciones de código
 
 ### TypeScript
+
 - `strict: true`, `noImplicitAny: true`, `exactOptionalPropertyTypes: true`, `noUncheckedIndexedAccess: true`.
 - Sin `any`. Sin `@ts-ignore` salvo justificación en comentario.
 - Tipos compartidos backend ↔ frontend: paquete `packages/shared` o duplicación manual con script de sync (decidir en Fase 0).
 
 ### Backend
+
 - **Controllers thin**: validan input (con `zod`), llaman service, mapean response. NO contienen lógica de negocio.
 - **Services puros**: reciben dependencias por parámetros o DI. Testeables sin HTTP.
 - **Repositories**: única capa que toca `prisma`. Facilita mocking.
@@ -1093,6 +1146,7 @@ export const PLAN_LIMITS = {
 - Async/await siempre. Sin callbacks.
 
 ### Frontend
+
 - **Features-first**, no carpetas por tipo. Una feature contiene sus components, hooks, types, tests.
 - **TanStack Query** para todo lo que sea server state. Zustand SOLO para auth + UI ephemeral.
 - Componentes pequeños, single responsibility.
@@ -1100,12 +1154,14 @@ export const PLAN_LIMITS = {
 - Tailwind classes ordenadas con plugin oficial Prettier.
 
 ### Tests
+
 - **Unit**: services puros, utils, components React aislados.
 - **Integration**: endpoints completos con DB de prueba (SQLite o MySQL test). Supertest.
 - **E2E**: Playwright en v.1.5 (no bloquea MVP).
 - Coverage objetivo: 70% líneas en services + utils (no perseguir 100%).
 
 ### Git
+
 - Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
 - Branch principal: `main`. Trabajo en `feat/*`, PR a `main` con CI verde.
 - Pre-commit: ESLint + Prettier + typecheck via Husky + lint-staged.
@@ -1116,6 +1172,7 @@ export const PLAN_LIMITS = {
 ## 12. Orden de construcción v.1 (8-10 semanas full-time)
 
 ### Fase 0 — Setup (3-4 días)
+
 - Repo + estructura completa
 - TypeScript + ESLint + Prettier + Husky + lint-staged
 - Prisma + schema completo (sección 5) + primera migration
@@ -1127,6 +1184,7 @@ export const PLAN_LIMITS = {
 - DNS para Resend (SPF + DKIM + DMARC)
 
 ### Fase 1 — Auth + Users (5-7 días)
+
 - Registro + verificación email
 - Login + JWT httpOnly cookies + CSRF middleware
 - Refresh rotation + logout
@@ -1137,6 +1195,7 @@ export const PLAN_LIMITS = {
 - Tests integration para flujos completos
 
 ### Fase 2 — ML integración + Búsqueda (5-7 días)
+
 - ML OAuth flow (state + PKCE)
 - `MLOAuthToken` con AES-256-GCM
 - `tokenRefresh.job`
@@ -1146,12 +1205,14 @@ export const PLAN_LIMITS = {
 - Frontend: Search page + ProductCard + SearchBar + filtros + grid
 
 ### Fase 3 — Tracking (4-5 días)
+
 - `TrackedProduct` CRUD
 - `ownership` middleware genérico
 - Plan FREE lock por producto (30d)
 - Frontend: Dashboard + add-tracking modal + lista
 
 ### Fase 4 — Polling + History (5-7 días)
+
 - Tabla `Job` + worker in-proc + scheduler con `node-cron`
 - `pricePoll.job` con dedup + throttling + priority
 - `PriceHistory` model + writes
@@ -1160,6 +1221,7 @@ export const PLAN_LIMITS = {
 - Frontend: ProductDetail con Recharts LineChart
 
 ### Fase 5 — Alertas + Email (5-7 días)
+
 - `Alert` CRUD con modes/directions
 - `AlertNotification` + idempotencia
 - Resend integration + templates `react-email`
@@ -1168,6 +1230,7 @@ export const PLAN_LIMITS = {
 - Frontend: AlertForm + lista de alertas + edición
 
 ### Fase 6 — Billing (7-10 días — el más complejo)
+
 - MercadoPago SDK + Checkout Pro + preapproval
 - `Subscription` state machine completa
 - Webhook `/api/billing/webhook` con HMAC + idempotencia
@@ -1176,6 +1239,7 @@ export const PLAN_LIMITS = {
 - Frontend: Pricing page + Settings>Billing + flow de upgrade
 
 ### Fase 7 — WhatsApp (5-7 días — depende de aprobación Meta, hacer en paralelo a F8 si Meta demora)
+
 - Templates aprobadas en Meta
 - `whatsapp.service` con `libphonenumber-js`
 - Opt-in flow + `WhatsAppOptIn` model
@@ -1184,6 +1248,7 @@ export const PLAN_LIMITS = {
 - Frontend: Settings>WhatsApp opt-in flow
 
 ### Fase 8 — AliExpress + Trending (6-8 días)
+
 - AE service con SHA256 + endpoints affiliate
 - Búsqueda unificada ML + AE en `/api/search`
 - ML trends + AE hotproduct
@@ -1192,6 +1257,7 @@ export const PLAN_LIMITS = {
 - Aviso de affiliate links en footer
 
 ### Fase 9 — Pulido + Legal + Producción (5-7 días)
+
 - Términos, privacidad, cookies en `/legal/*`
 - Cookie banner mínimo
 - Delete account flow real (soft delete + email + descarga de datos)
@@ -1208,6 +1274,7 @@ export const PLAN_LIMITS = {
 ## 13. Comandos
 
 ### Setup local
+
 ```bash
 # Backend
 cd backend
@@ -1224,6 +1291,7 @@ npm run dev                # vite, puerto 5173
 ```
 
 ### Tests
+
 ```bash
 cd backend && npm test                 # vitest
 cd backend && npm run test:integration
@@ -1231,6 +1299,7 @@ cd frontend && npm test
 ```
 
 ### Lint & format
+
 ```bash
 npm run lint
 npm run format
@@ -1238,12 +1307,14 @@ npm run typecheck
 ```
 
 ### Build
+
 ```bash
 cd frontend && npm run build           # dist/
 cd backend && npm run build            # dist/
 ```
 
 ### Producción
+
 ```bash
 cd backend
 npx prisma migrate deploy
@@ -1251,6 +1322,7 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 ```
 
 ### Deploy (script en `scripts/deploy.sh`)
+
 ```bash
 ./scripts/deploy.sh                    # ssh + git pull + npm ci + build + migrate + restart Passenger
 ```
@@ -1262,13 +1334,15 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 > v.2 entra en planeación cuando v.1 esté en producción con tracción medible. **NO se construye en v.1.**
 
 ### Triggers de migración (no antes)
-- >500 usuarios activos diarios
-- >5000 productos rastreados
+
+- > 500 usuarios activos diarios
+- > 5000 productos rastreados
 - CPU o RAM consistentemente >70% en Hostinger Business
 - Retraso de polling >30 min vs schedule
 - Necesidad validada de Amazon u otra integración nueva
 
 ### Infraestructura v.2
+
 - **Migrar a VPS**: Hostinger VPS KVM 2+ (USD 7-15/mes) o Hetzner CX22 (€5/mes).
 - Ubuntu 22.04 + Nginx + PM2 (cluster mode) + Redis 7 + MySQL 8 (o managed externo).
 - `RedisCacheService` reemplaza `LruCacheService` (interfaces ya definidas en v.1).
@@ -1278,12 +1352,14 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 - Migración zero-downtime: deploy en VPS + DNS switch via Cloudflare + Business como fallback 1 semana.
 
 ### Observabilidad v.2
+
 - Logtail/BetterStack paid o Grafana Loki self-hosted.
 - Prometheus + Grafana (o Grafana Cloud).
 - Sentry Performance o OpenTelemetry → Tempo.
 - Status page pública.
 
 ### Nuevas integraciones v.2
+
 - **Amazon Product Advertising API (PA-API 5.0)**: México + Brasil. Empezar aprobación Amazon Associates pronto.
 - **eBay Affiliate Network**: cobertura global.
 - **Shopee API**: Brasil + México.
@@ -1291,6 +1367,7 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 - **Walmart Marketplace API**: México.
 
 ### Features de producto v.2
+
 - **Predicción de precios con ML**: servicio Python (FastAPI) con regresión + estacionalidad. Feature exclusiva COMERCIANTE.
 - **Alertas inteligentes**: "menor al promedio histórico", "mínimo histórico", "X días antes de Black Friday".
 - **Comparador de variantes cross-marketplace**: mismo producto en ML/AE/Amazon + cálculo de margen + costo de importación.
@@ -1302,6 +1379,7 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 - **Equipos/workspaces (ENTERPRISE)**: múltiples users por cuenta, roles, auditoría por usuario.
 
 ### Nuevos planes v.2
+
 - **ENTERPRISE** (nuevo, precio TBD): equipos + webhooks + soporte prioritario + SLA.
 - PRO + alertas inteligentes.
 - COMERCIANTE + Amazon + eBay + predicciones + comparador + API.
@@ -1310,18 +1388,18 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 
 ## 15. Acciones externas — checklist (paralelo al desarrollo)
 
-| Acción | Tiempo | Estado | Bloqueante para |
-|---|---|---|---|
-| Comprar dominio kairo.com.co | 1h | ⏳ | Fase 0 (DNS, SSL, emails) |
-| Configurar Cloudflare free | 1h | ⏳ | Fase 0 |
-| Cuenta MercadoPago Business + credenciales | 1-3 días | ⏳ | Fase 6 |
-| Cuenta Resend + verificar dominio (DNS) | 1-3 días | ⏳ | Fase 1 (welcome email), Fase 5 |
-| Cuenta Sentry + Uptime Robot | 30 min | ⏳ | Fase 0 |
-| ML OAuth (app registrada en developers.mercadolibre.com.co) | iniciado, respuesta mañana | ⏳ | Fase 2 |
-| AliExpress Affiliate (aprobación) | días a 2 semanas, riesgo de rechazo | ⏳ | Fase 8 |
-| Meta Business Verification | 1-3 semanas | ⏳ | Fase 7 |
-| Templates WhatsApp aprobadas (3) | 1-7 días por template | ⏳ | Fase 7 |
-| Cuenta Alegra/Siigo para DIAN | después de validar primeros pagos | 📋 | v.1.5 |
+| Acción                                                      | Tiempo                              | Estado | Bloqueante para                |
+| ----------------------------------------------------------- | ----------------------------------- | ------ | ------------------------------ |
+| Comprar dominio kairo.com.co                                | 1h                                  | ⏳     | Fase 0 (DNS, SSL, emails)      |
+| Configurar Cloudflare free                                  | 1h                                  | ⏳     | Fase 0                         |
+| Cuenta MercadoPago Business + credenciales                  | 1-3 días                            | ⏳     | Fase 6                         |
+| Cuenta Resend + verificar dominio (DNS)                     | 1-3 días                            | ⏳     | Fase 1 (welcome email), Fase 5 |
+| Cuenta Sentry + Uptime Robot                                | 30 min                              | ⏳     | Fase 0                         |
+| ML OAuth (app registrada en developers.mercadolibre.com.co) | iniciado, respuesta mañana          | ⏳     | Fase 2                         |
+| AliExpress Affiliate (aprobación)                           | días a 2 semanas, riesgo de rechazo | ⏳     | Fase 8                         |
+| Meta Business Verification                                  | 1-3 semanas                         | ⏳     | Fase 7                         |
+| Templates WhatsApp aprobadas (3)                            | 1-7 días por template               | ⏳     | Fase 7                         |
+| Cuenta Alegra/Siigo para DIAN                               | después de validar primeros pagos   | 📋     | v.1.5                          |
 
 **Plan B AliExpress:** aggregators (Admitad, Awin). Si todo falla, fase 8 queda solo con ML trending y AE se mueve a v.2.
 
@@ -1330,6 +1408,7 @@ node dist/server.js                    # Passenger Hostinger lo hace por nosotro
 ## 16. Identidad visual
 
 Detalle completo en `kairo-design-brief.md`. Resumen:
+
 - **Color principal:** Ámbar Kairo `#BA7517`
 - **Crema:** `#FAEEDA` (CTAs texto, backgrounds claros)
 - **Navy:** `#1a1a2e` (dark mode)
@@ -1342,17 +1421,17 @@ Detalle completo en `kairo-design-brief.md`. Resumen:
 
 ## 17. Riesgos conocidos y mitigaciones
 
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|---|---|---|---|
-| Meta tarda 4+ semanas en aprobar WhatsApp | Alto | Alto | Fase 7 puede correr en paralelo a F8; lanzar v.1 sin WA si demora demasiado (anunciar como "coming soon") |
-| AliExpress Affiliate rechaza aplicación | Medio | Medio | Plan B: aggregators o quitar AE de v.1 |
-| Hostinger Business no aguanta carga real >500 users | Medio | Alto | Migración v.2 a VPS ya diseñada (swap de bindings, no reescritura) |
-| ML cambia política OAuth o rate limits | Medio | Alto | Service abstraído, backoff explícito, fallback a app-only token |
-| MercadoPago webhook duplica eventos | Alto | Bajo | `WebhookEvent` con unique index + idempotency |
-| Costos WhatsApp se disparan en PRO | Medio | Medio | Métricas custom + soft cap 100msg/mes/PRO + email avisando |
-| Token OAuth ML expira sin renovar | Medio | Medio | `tokenRefresh.job` cada hora + alerta Sentry si falla |
-| Polling no termina antes del siguiente ciclo | Bajo en v.1 | Alto | Dedup + priority + throttling. Migración a v.2 si pasa el threshold |
-| Backup Hostinger no incluye MySQL o falla | Bajo | Crítico | Verificar + backup secundario semanal manual a S3/Backblaze + restore probado mensual |
+| Riesgo                                              | Probabilidad | Impacto | Mitigación                                                                                                |
+| --------------------------------------------------- | ------------ | ------- | --------------------------------------------------------------------------------------------------------- |
+| Meta tarda 4+ semanas en aprobar WhatsApp           | Alto         | Alto    | Fase 7 puede correr en paralelo a F8; lanzar v.1 sin WA si demora demasiado (anunciar como "coming soon") |
+| AliExpress Affiliate rechaza aplicación             | Medio        | Medio   | Plan B: aggregators o quitar AE de v.1                                                                    |
+| Hostinger Business no aguanta carga real >500 users | Medio        | Alto    | Migración v.2 a VPS ya diseñada (swap de bindings, no reescritura)                                        |
+| ML cambia política OAuth o rate limits              | Medio        | Alto    | Service abstraído, backoff explícito, fallback a app-only token                                           |
+| MercadoPago webhook duplica eventos                 | Alto         | Bajo    | `WebhookEvent` con unique index + idempotency                                                             |
+| Costos WhatsApp se disparan en PRO                  | Medio        | Medio   | Métricas custom + soft cap 100msg/mes/PRO + email avisando                                                |
+| Token OAuth ML expira sin renovar                   | Medio        | Medio   | `tokenRefresh.job` cada hora + alerta Sentry si falla                                                     |
+| Polling no termina antes del siguiente ciclo        | Bajo en v.1  | Alto    | Dedup + priority + throttling. Migración a v.2 si pasa el threshold                                       |
+| Backup Hostinger no incluye MySQL o falla           | Bajo         | Crítico | Verificar + backup secundario semanal manual a S3/Backblaze + restore probado mensual                     |
 
 ---
 
