@@ -1,1 +1,0 @@
-chore: eliminar COMMIT_MSG.txt commiteado por error en Fase 6
