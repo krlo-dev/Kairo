@@ -4,6 +4,7 @@ import type {
   AlertTriggeredParams,
   EmailService,
   PasswordResetParams,
+  PlanDowngradedParams,
   VerifyEmailParams,
 } from '../interfaces/EmailService.js';
 import { env } from '../config/env.js';
@@ -12,6 +13,7 @@ import {
   accountLockedTemplate,
   alertTriggeredTemplate,
   passwordResetTemplate,
+  planDowngradedTemplate,
   verifyEmailTemplate,
 } from './emailTemplates.js';
 
@@ -48,6 +50,11 @@ export class ResendEmailService implements EmailService {
       params.currency,
       params.targetPrice,
     );
+    await this.send(params.to, tpl.subject, tpl.html, tpl.text);
+  }
+
+  async sendPlanDowngraded(params: PlanDowngradedParams): Promise<void> {
+    const tpl = planDowngradedTemplate(params.name, params.fromPlan);
     await this.send(params.to, tpl.subject, tpl.html, tpl.text);
   }
 

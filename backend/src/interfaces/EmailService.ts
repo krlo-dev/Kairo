@@ -26,9 +26,16 @@ export interface AlertTriggeredParams {
   targetPrice: number | null;
 }
 
+export interface PlanDowngradedParams {
+  to: string;
+  name: string;
+  fromPlan: string;
+}
+
 export interface EmailService {
   sendVerifyEmail(params: VerifyEmailParams): Promise<void>;
   sendPasswordReset(params: PasswordResetParams): Promise<void>;
   sendAccountLocked(params: AccountLockedParams): Promise<void>;
   sendAlertTriggered(params: AlertTriggeredParams): Promise<void>;
+  sendPlanDowngraded(params: PlanDowngradedParams): Promise<void>;
 }

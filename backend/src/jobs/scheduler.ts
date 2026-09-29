@@ -8,6 +8,7 @@ import { startTokenRefreshJob } from './tokenRefresh.job.js';
 import { startPricePollJob } from './pricePoll.job.js';
 import { startCleanupJob } from './cleanup.job.js';
 import { startAlertRetryJob } from './alertRetry.job.js';
+import { startSubscriptionDowngradeJob } from './subscriptionDowngrade.job.js';
 
 // Entrypoint único de node-cron — arranca todos los jobs programados de la
 // app y devuelve sus handles para poder detenerlos en el shutdown.
@@ -31,6 +32,7 @@ export function startScheduler(deps: SchedulerDeps): SchedulerHandle {
     startPricePollJob({ prisma: deps.prisma, ml, ae, email: deps.email }),
     startCleanupJob({ prisma: deps.prisma }),
     startAlertRetryJob({ prisma: deps.prisma, email: deps.email }),
+    startSubscriptionDowngradeJob({ prisma: deps.prisma, email: deps.email }),
   ];
 
   return {

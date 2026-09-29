@@ -120,3 +120,22 @@ export function alertTriggeredTemplate(
     }.\n\nVerlo aquí: ${productUrl}`,
   );
 }
+
+const PLAN_LABEL: Record<string, string> = {
+  FREE: 'Free',
+  PRO: 'Pro',
+  COMERCIANTE: 'Comerciante',
+};
+
+export function planDowngradedTemplate(name: string, fromPlan: string): Wrapped {
+  const safeName = escapeHtml(name);
+  const fromLabel = PLAN_LABEL[fromPlan] ?? fromPlan;
+  return wrap(
+    'Tu plan de Kairo cambió a Free',
+    `<p>Hola ${safeName},</p>
+     <p>Tu suscripción al plan <strong>${escapeHtml(fromLabel)}</strong> terminó y tu cuenta pasó al plan Free.</p>
+     <p>Si rastreabas más de 3 productos, dejamos activos los 3 más recientes; el resto quedó pausado (no perdiste su historial, solo se dejó de actualizar).</p>
+     <p style="color: #666; font-size: 14px;">Puedes volver a subir de plan cuando quieras desde tu cuenta.</p>`,
+    `Hola ${name},\n\nTu suscripción al plan ${fromLabel} terminó y tu cuenta pasó al plan Free. Si rastreabas más de 3 productos, dejamos activos los 3 más recientes.\n\nPuedes volver a subir de plan cuando quieras.`,
+  );
+}

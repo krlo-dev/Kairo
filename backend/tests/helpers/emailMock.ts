@@ -8,7 +8,14 @@ export function createEmailMock() {
   const sendPasswordReset = vi.fn().mockResolvedValue(undefined);
   const sendAccountLocked = vi.fn().mockResolvedValue(undefined);
   const sendAlertTriggered = vi.fn().mockResolvedValue(undefined);
-  return { sendVerifyEmail, sendPasswordReset, sendAccountLocked, sendAlertTriggered };
+  const sendPlanDowngraded = vi.fn().mockResolvedValue(undefined);
+  return {
+    sendVerifyEmail,
+    sendPasswordReset,
+    sendAccountLocked,
+    sendAlertTriggered,
+    sendPlanDowngraded,
+  };
 }
 
 export function asEmail(mock: EmailMock): EmailService {

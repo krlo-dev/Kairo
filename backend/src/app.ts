@@ -15,6 +15,7 @@ import { mlRouter } from './routes/ml.routes.js';
 import { searchRouter } from './routes/search.routes.js';
 import { trackingRouter } from './routes/tracking.routes.js';
 import { alertsRouter } from './routes/alerts.routes.js';
+import { billingRouter } from './routes/billing.routes.js';
 import { env } from './config/env.js';
 
 export function createApp(): Express {
@@ -80,6 +81,7 @@ export function createApp(): Express {
   app.use('/api', searchRouter);
   app.use('/api', trackingRouter);
   app.use('/api', alertsRouter);
+  app.use('/api', billingRouter);
 
   // 404 + error handler
   app.use(notFoundHandler);

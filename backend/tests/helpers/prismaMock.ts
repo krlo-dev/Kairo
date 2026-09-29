@@ -40,6 +40,7 @@ export function createPrismaMock() {
       count: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
     },
     priceHistory: {
       findMany: vi.fn(),
@@ -67,6 +68,21 @@ export function createPrismaMock() {
     },
     auditLog: {
       create: vi.fn(),
+    },
+    subscription: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
+    },
+    payment: {
+      findMany: vi.fn(),
+      upsert: vi.fn(),
+    },
+    webhookEvent: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
     },
     $transaction: vi.fn(),
   };

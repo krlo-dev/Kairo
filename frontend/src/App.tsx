@@ -12,6 +12,7 @@ import { Dashboard } from './pages/Dashboard';
 import { ProductDetail } from './pages/ProductDetail';
 import { Search } from './pages/Search';
 import { Settings } from './pages/Settings';
+import { Pricing } from './pages/Pricing';
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/tracking/:id" element={<ProductDetail />} />
           <Route path="/search" element={<Search />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/pricing" element={<Pricing />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

@@ -4,7 +4,9 @@ import { Errors } from '../utils/errors.js';
 
 // Estos endpoints NO requieren CSRF porque crean/restauran la sesión —
 // el cliente todavía no tiene cookie csrfToken. La protección efectiva
-// proviene del rate-limit en estos endpoints.
+// proviene del rate-limit en estos endpoints. /billing/webhook es distinto:
+// lo llama MercadoPago (no un browser), nunca va a traer nuestras cookies —
+// se protege verificando la firma HMAC en su lugar (ver billing.routes.ts).
 //
 // Paths sin prefijo `/api` porque el middleware se monta con
 // app.use('/api', csrfProtect) y req.path queda relativo al mount point.
@@ -16,6 +18,7 @@ const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/reset-password',
   '/api/auth/verify-email',
   '/api/auth/refresh',
+  '/api/billing/webhook',
 ]);
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);

@@ -3,6 +3,7 @@ import type {
   AlertTriggeredParams,
   EmailService,
   PasswordResetParams,
+  PlanDowngradedParams,
   VerifyEmailParams,
 } from '../interfaces/EmailService.js';
 import { logger } from '../logger/pino.js';
@@ -40,6 +41,14 @@ export class ConsoleEmailService implements EmailService {
     logger.warn(
       { to: params.to, productTitle: params.productTitle, price: params.price },
       '[console-email] alert-triggered (no Resend configurada)',
+    );
+    return Promise.resolve();
+  }
+
+  async sendPlanDowngraded(params: PlanDowngradedParams): Promise<void> {
+    logger.warn(
+      { to: params.to, fromPlan: params.fromPlan },
+      '[console-email] plan-downgraded (no Resend configurada)',
     );
     return Promise.resolve();
   }
